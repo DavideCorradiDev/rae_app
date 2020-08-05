@@ -20,6 +20,10 @@ pub mod touch {
     pub use winit::event::{Force, TouchPhase};
 }
 
+pub mod controller {
+    pub use winit::event::{AxisId, ButtonId};
+}
+
 mod event_loop_any_thread;
 pub mod event {
     pub use super::event_loop_any_thread::EventLoopAnyThread;
