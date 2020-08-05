@@ -20,7 +20,7 @@ where
     }
 
     #[cfg(not(any(target_os = "linux", target_os = "windows")))]
-    fn new_any_thread<T: 'static>() -> winit::event_loop::EventLoop<T> {
+    fn new_any_thread() -> winit::event_loop::EventLoop<T> {
         winit::event_loop::EventLoop::new()
     }
 }
