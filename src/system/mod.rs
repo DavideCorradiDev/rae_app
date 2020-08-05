@@ -28,7 +28,7 @@ mod event_loop_any_thread;
 pub mod event {
     pub use super::event_loop_any_thread::EventLoopAnyThread;
     pub use winit::{
-        event::{DeviceEvent, Event, StartCause, WindowEvent},
+        event::{DeviceEvent, DeviceId, Event, StartCause, WindowEvent},
         event_loop::*,
     };
 }
