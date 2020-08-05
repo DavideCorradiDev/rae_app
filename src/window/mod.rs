@@ -12,5 +12,5 @@ pub mod keyboard {
     pub use winit::event::{ModifiersState, ScanCode, VirtualKeyCode as KeyCode};
 }
 
-pub mod event_loop_any_thread;
+mod event_loop_any_thread;
 pub use event_loop_any_thread::EventLoopAnyThread;
