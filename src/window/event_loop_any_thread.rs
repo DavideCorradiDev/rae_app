@@ -21,6 +21,6 @@ where
 
     #[cfg(not(any(target_os = "linux", target_os = "windows")))]
     fn new_any_thread() -> winit::event_loop::EventLoop<T> {
-        winit::event_loop::EventLoop::<T>::new()
+        winit::event_loop::EventLoop::<T>::with_user_event()
     }
 }
