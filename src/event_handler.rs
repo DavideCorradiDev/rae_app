@@ -1,12 +1,12 @@
 use crate::{keyboard, DeviceId, EventLoop, WindowId};
 
-pub trait EventHandler<Error, Event>
+pub trait EventHandler<Error, CustomEvent>
 where
     Self: std::marker::Sized,
     Error: std::fmt::Display + std::error::Error + 'static,
-    Event: 'static,
+    CustomEvent: 'static,
 {
-    fn new(event_loop: &EventLoop<Event>) -> Result<Self, Error>;
+    fn new(event_loop: &EventLoop<CustomEvent>) -> Result<Self, Error>;
 
     fn is_close_requested(&self) -> bool {
         false
