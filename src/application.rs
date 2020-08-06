@@ -43,22 +43,16 @@ impl Application {
         EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
     {
         let event_loop = EventLoop::<CustomEvent>::with_user_event();
-        let mut event_handler = match EventHandlerType::new(&event_loop) {
-            Ok(v) => v,
-            Err(e) => {
-                Self::panic_with_error(e);
-                return;
-            }
-        };
+        let mut event_handler = EventHandlerType::new(&event_loop)
+            .expect("Failed to initialize the application event handler");
 
         let current_time = std::time::Instant::now();
         self.last_fixed_update_time = current_time;
         self.last_variable_update_time = current_time;
 
         event_loop.run(move |event, _, control_flow| {
-            if let Err(e) = self.run_frame(&mut event_handler, event) {
-                Self::panic_with_error(e);
-            };
+            self.run_frame(&mut event_handler, event)
+                .expect("The application shut down due to an error");
             if event_handler.is_close_requested() {
                 *control_flow = ControlFlow::Exit;
             }
@@ -103,12 +97,5 @@ impl Application {
         EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
     {
         Ok(())
-    }
-
-    fn panic_with_error<Error>(error: Error)
-    where
-        Error: std::fmt::Display + std::error::Error + 'static,
-    {
-        panic!("The application shut down due to an error ({})", error);
     }
 }
