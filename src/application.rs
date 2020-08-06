@@ -32,7 +32,7 @@ impl Application {
         let mut event_handler = match EventHandlerType::new(&event_loop) {
             Ok(v) => v,
             Err(e) => {
-                Self::report_error(e);
+                Self::panic_with_error(e);
                 return;
             }
         };
@@ -43,8 +43,7 @@ impl Application {
 
         event_loop.run(move |event, _, control_flow| {
             if let Err(e) = self.run_frame(&mut event_handler, event) {
-                Self::report_error(e);
-                *control_flow = ControlFlow::Exit;
+                Self::panic_with_error(e);
             };
             if event_handler.is_close_requested() {
                 *control_flow = ControlFlow::Exit;
@@ -89,10 +88,10 @@ impl Application {
         Ok(())
     }
 
-    fn report_error<Error>(error: Error)
+    fn panic_with_error<Error>(error: Error)
     where
         Error: std::fmt::Display + std::error::Error + 'static,
     {
-        println!("The application shut down due to an error ({})", error);
+        panic!("The application shut down due to an error ({})", error);
     }
 }
