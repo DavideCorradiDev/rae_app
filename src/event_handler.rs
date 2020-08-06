@@ -1,4 +1,4 @@
-use crate::system::{event, keyboard, window};
+use crate::{keyboard, DeviceId, EventLoop, WindowId};
 
 pub trait EventHandler<Error, Event>
 where
@@ -6,28 +6,28 @@ where
     Error: std::fmt::Display + std::error::Error + 'static,
     Event: 'static,
 {
-    fn new(event_loop: &event::EventLoop<Event>) -> Result<Self, Error>;
+    fn new(event_loop: &EventLoop<Event>) -> Result<Self, Error>;
 
     fn is_close_requested(&self) -> bool {
         false
     }
 
-    fn on_close_requested(&mut self, _wid: window::WindowId) -> Result<(), Error> {
+    fn on_close_requested(&mut self, _wid: WindowId) -> Result<(), Error> {
         Ok(())
     }
 
-    fn on_focus_gained(&mut self, _wid: window::WindowId) -> Result<(), Error> {
+    fn on_focus_gained(&mut self, _wid: WindowId) -> Result<(), Error> {
         Ok(())
     }
 
-    fn on_focus_lost(&mut self, _wid: window::WindowId) -> Result<(), Error> {
+    fn on_focus_lost(&mut self, _wid: WindowId) -> Result<(), Error> {
         Ok(())
     }
 
     fn on_key_pressed(
         &mut self,
-        _wid: window::WindowId,
-        _device_id: event::DeviceId,
+        _wid: WindowId,
+        _device_id: DeviceId,
         _scan_code: keyboard::ScanCode,
         _key_code: Option<keyboard::KeyCode>,
     ) -> Result<(), Error> {
@@ -36,8 +36,8 @@ where
 
     fn on_key_released(
         &mut self,
-        _wid: window::WindowId,
-        _device_id: event::DeviceId,
+        _wid: WindowId,
+        _device_id: DeviceId,
         _scan_code: keyboard::ScanCode,
         _key_code: Option<keyboard::KeyCode>,
     ) -> Result<(), Error> {
