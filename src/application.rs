@@ -2,21 +2,34 @@ use crate::{ControlFlow, Event, EventHandler, EventLoop};
 
 pub struct Application {
     fixed_update_period: std::time::Duration,
+    variable_update_min_period: Option<std::time::Duration>,
     last_fixed_update_time: std::time::Instant,
     last_variable_update_time: std::time::Instant,
 }
 
 impl Application {
-    pub fn new(fixed_update_frequency_hz: u64) -> Self {
+    pub fn new(
+        fixed_update_frequency_hz: u64,
+        variable_update_max_frequency_hz: Option<u64>,
+    ) -> Self {
         assert!(
             fixed_update_frequency_hz > 0,
-            "The update frequency must be higher than 0"
+            "The fixed update frequency must be higher than 0"
         );
+        if let Some(v) = variable_update_max_frequency_hz {
+            assert!(v > 0, "The variable update frequency must be higher than 0");
+        }
+
+        let fixed_update_period =
+            std::time::Duration::from_secs_f64(1. / fixed_update_frequency_hz as f64);
+        let variable_update_min_period = match variable_update_max_frequency_hz {
+            Some(v) => Some(std::time::Duration::from_secs_f64(1. / v as f64)),
+            None => None,
+        };
         let current_time = std::time::Instant::now();
         Self {
-            fixed_update_period: std::time::Duration::from_secs_f64(
-                1. / fixed_update_frequency_hz as f64,
-            ),
+            fixed_update_period,
+            variable_update_min_period,
             last_fixed_update_time: current_time,
             last_variable_update_time: current_time,
         }
