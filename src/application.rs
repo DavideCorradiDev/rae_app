@@ -3,16 +3,25 @@ use crate::{ControlFlow, Event, EventHandler, EventLoop};
 pub struct Application {}
 
 impl Application {
-    pub fn run<Error, CustomEvent, EventHandlerType>(
-        fixed_update_frequency_hz: u64,
-    ) -> Result<(), Error>
+    pub fn run<Error, CustomEvent, EventHandlerType>(fixed_update_frequency_hz: u64)
     where
         Error: std::fmt::Display + std::error::Error + 'static,
         CustomEvent: 'static,
         EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
     {
+        assert!(
+            fixed_update_frequency_hz > 0,
+            "The update frequency must be higher than 0"
+        );
+
         let event_loop = EventLoop::<CustomEvent>::with_user_event();
-        let mut event_handler = EventHandlerType::new(&event_loop)?;
+        let mut event_handler = match EventHandlerType::new(&event_loop) {
+            Ok(v) => v,
+            Err(e) => {
+                Self::report_error(e);
+                return;
+            }
+        };
 
         let fixed_update_period =
             std::time::Duration::from_secs_f64(1. / fixed_update_frequency_hz as f64);
