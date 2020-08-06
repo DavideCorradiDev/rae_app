@@ -30,35 +30,47 @@ impl Application {
         let mut last_variable_update_time = last_fixed_update_time;
 
         event_loop.run(move |event, _, control_flow| {
-            if let Err(e) = Self::handle_event(event, &mut event_handler) {
+            if let Err(e) = Self::run_frame(
+                &mut event_handler,
+                event,
+                fixed_update_period,
+                &mut last_fixed_update_time,
+                &mut last_variable_update_time,
+            ) {
                 Self::report_error(e);
                 *control_flow = ControlFlow::Exit;
-            }
-            let current_time = std::time::Instant::now();
-
-            while current_time - last_fixed_update_time >= fixed_update_period {
-                if let Err(e) = event_handler.on_fixed_update(fixed_update_period) {
-                    Self::report_error(e);
-                    *control_flow = ControlFlow::Exit;
-                    return;
-                }
-                last_fixed_update_time += fixed_update_period;
-            }
-
-            if let Err(e) =
-                event_handler.on_variable_update(current_time - last_variable_update_time)
-            {
-                Self::report_error(e);
-                *control_flow = ControlFlow::Exit;
-                return;
-            }
-            last_variable_update_time = current_time;
-
+            };
             if event_handler.is_close_requested() {
                 *control_flow = ControlFlow::Exit;
-                return;
             }
         });
+    }
+
+    fn run_frame<Error, CustomEvent, EventHandlerType>(
+        event_handler: &mut EventHandlerType,
+        event: Event<CustomEvent>,
+        fixed_update_period: std::time::Duration,
+        last_fixed_update_time: &mut std::time::Instant,
+        last_variable_update_time: &mut std::time::Instant,
+    ) -> Result<(), Error>
+    where
+        Error: std::fmt::Display + std::error::Error + 'static,
+        CustomEvent: 'static,
+        EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
+    {
+        Self::handle_event(event, event_handler)?;
+
+        let current_time = std::time::Instant::now();
+
+        while current_time - *last_fixed_update_time >= fixed_update_period {
+            event_handler.on_fixed_update(fixed_update_period)?;
+            *last_fixed_update_time += fixed_update_period;
+        }
+
+        event_handler.on_variable_update(current_time - *last_variable_update_time)?;
+        *last_variable_update_time = current_time;
+
+        Ok(())
     }
 
     fn handle_event<Error, CustomEvent, EventHandlerType>(
