@@ -1,19 +1,33 @@
 use crate::{ControlFlow, Event, EventHandler, EventLoop};
 
-pub struct Application {}
+pub struct Application {
+    fixed_update_period: std::time::Duration,
+    last_fixed_update_time: std::time::Instant,
+    last_variable_update_time: std::time::Instant,
+}
 
 impl Application {
-    pub fn run<Error, CustomEvent, EventHandlerType>(fixed_update_frequency_hz: u64)
+    pub fn new(fixed_update_frequency_hz: u64) -> Self {
+        assert!(
+            fixed_update_frequency_hz > 0,
+            "The update frequency must be higher than 0"
+        );
+        let current_time = std::time::Instant::now();
+        Self {
+            fixed_update_period: std::time::Duration::from_secs_f64(
+                1. / fixed_update_frequency_hz as f64,
+            ),
+            last_fixed_update_time: current_time,
+            last_variable_update_time: current_time,
+        }
+    }
+
+    pub fn run<Error, CustomEvent, EventHandlerType>(mut self)
     where
         Error: std::fmt::Display + std::error::Error + 'static,
         CustomEvent: 'static,
         EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
     {
-        assert!(
-            fixed_update_frequency_hz > 0,
-            "The update frequency must be higher than 0"
-        );
-
         let event_loop = EventLoop::<CustomEvent>::with_user_event();
         let mut event_handler = match EventHandlerType::new(&event_loop) {
             Ok(v) => v,
@@ -23,20 +37,12 @@ impl Application {
             }
         };
 
-        let fixed_update_period =
-            std::time::Duration::from_secs_f64(1. / fixed_update_frequency_hz as f64);
-
-        let mut last_fixed_update_time = std::time::Instant::now();
-        let mut last_variable_update_time = last_fixed_update_time;
+        let current_time = std::time::Instant::now();
+        self.last_fixed_update_time = current_time;
+        self.last_variable_update_time = current_time;
 
         event_loop.run(move |event, _, control_flow| {
-            if let Err(e) = Self::run_frame(
-                &mut event_handler,
-                event,
-                fixed_update_period,
-                &mut last_fixed_update_time,
-                &mut last_variable_update_time,
-            ) {
+            if let Err(e) = self.run_frame(&mut event_handler, event) {
                 Self::report_error(e);
                 *control_flow = ControlFlow::Exit;
             };
@@ -47,11 +53,9 @@ impl Application {
     }
 
     fn run_frame<Error, CustomEvent, EventHandlerType>(
+        &mut self,
         event_handler: &mut EventHandlerType,
         event: Event<CustomEvent>,
-        fixed_update_period: std::time::Duration,
-        last_fixed_update_time: &mut std::time::Instant,
-        last_variable_update_time: &mut std::time::Instant,
     ) -> Result<(), Error>
     where
         Error: std::fmt::Display + std::error::Error + 'static,
@@ -62,13 +66,13 @@ impl Application {
 
         let current_time = std::time::Instant::now();
 
-        while current_time - *last_fixed_update_time >= fixed_update_period {
-            event_handler.on_fixed_update(fixed_update_period)?;
-            *last_fixed_update_time += fixed_update_period;
+        while current_time - self.last_fixed_update_time >= self.fixed_update_period {
+            event_handler.on_fixed_update(self.fixed_update_period)?;
+            self.last_fixed_update_time += self.fixed_update_period;
         }
 
-        event_handler.on_variable_update(current_time - *last_variable_update_time)?;
-        *last_variable_update_time = current_time;
+        event_handler.on_variable_update(current_time - self.last_variable_update_time)?;
+        self.last_variable_update_time = current_time;
 
         Ok(())
     }
