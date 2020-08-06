@@ -2,7 +2,7 @@ use crate::{ControlFlow, Event, EventHandler, EventLoop};
 
 pub struct Application {
     fixed_update_period: std::time::Duration,
-    variable_update_min_period: Option<std::time::Duration>,
+    variable_update_min_period: std::time::Duration,
     last_fixed_update_time: std::time::Instant,
     last_variable_update_time: std::time::Instant,
 }
@@ -23,8 +23,8 @@ impl Application {
         let fixed_update_period =
             std::time::Duration::from_secs_f64(1. / fixed_update_frequency_hz as f64);
         let variable_update_min_period = match variable_update_max_frequency_hz {
-            Some(v) => Some(std::time::Duration::from_secs_f64(1. / v as f64)),
-            None => None,
+            Some(v) => std::time::Duration::from_secs_f64(1. / v as f64),
+            None => std::time::Duration::from_secs_f64(0.),
         };
         let current_time = std::time::Instant::now();
         Self {
@@ -83,8 +83,11 @@ impl Application {
             self.last_fixed_update_time += self.fixed_update_period;
         }
 
-        event_handler.on_variable_update(current_time - self.last_variable_update_time)?;
-        self.last_variable_update_time = current_time;
+        let variable_update_elapsed_time = current_time - self.last_variable_update_time;
+        if variable_update_elapsed_time > self.variable_update_min_period {
+            event_handler.on_variable_update(variable_update_elapsed_time)?;
+            self.last_variable_update_time = current_time;
+        }
 
         Ok(())
     }
