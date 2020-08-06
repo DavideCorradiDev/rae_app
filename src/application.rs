@@ -27,6 +27,7 @@ impl Application {
             None => std::time::Duration::from_secs_f64(0.),
         };
         let current_time = std::time::Instant::now();
+
         Self {
             fixed_update_period,
             variable_update_min_period,
