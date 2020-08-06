@@ -84,9 +84,9 @@ impl Application {
             self.last_fixed_update_time += self.fixed_update_period;
         }
 
-        let variable_update_elapsed_time = current_time - self.last_variable_update_time;
-        if variable_update_elapsed_time > self.variable_update_min_period {
-            event_handler.on_variable_update(variable_update_elapsed_time)?;
+        let time_since_last_variable_update = current_time - self.last_variable_update_time;
+        if time_since_last_variable_update > self.variable_update_min_period {
+            event_handler.on_variable_update(time_since_last_variable_update)?;
             self.last_variable_update_time = current_time;
         }
 
