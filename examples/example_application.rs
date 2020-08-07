@@ -1,7 +1,7 @@
 use rae_app::*;
 
 use application::Application;
-use event::{EventHandler, EventLoop};
+use event::{keyboard, DeviceId, EventHandler, EventLoop};
 use window::{PhysicalSize, Size, Window, WindowBuilder, WindowId};
 
 #[derive(Debug)]
@@ -22,7 +22,7 @@ impl std::error::Error for ApplicationError {
 struct CustomEvent {}
 
 struct ApplicationImpl {
-    window: Window,
+    _window: Window,
     close_requested: bool,
     processed_fixed_frames: u64,
     processed_variable_frames: u64,
@@ -42,7 +42,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
             .build(event_loop)
             .unwrap();
         Ok(Self {
-            window,
+            _window: window,
             close_requested: false,
             processed_fixed_frames: 0,
             processed_variable_frames: 0,
@@ -78,6 +78,44 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
             );
         }
         self.processed_variable_frames = self.processed_variable_frames + 1;
+        Ok(())
+    }
+
+    fn on_focus_gained(&mut self, _: WindowId) -> Result<(), Self::Error> {
+        println!("Processed 'focus gained' event");
+        Ok(())
+    }
+
+    fn on_focus_lost(&mut self, _: WindowId) -> Result<(), Self::Error> {
+        println!("Processed 'focus lost' event");
+        Ok(())
+    }
+
+    fn on_key_pressed(
+        &mut self,
+        _wid: WindowId,
+        device_id: DeviceId,
+        scan_code: keyboard::ScanCode,
+        key_code: Option<keyboard::KeyCode>,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'key pressed' event, device: {:?}, scan code: {:?}, key code: {:?}",
+            device_id, scan_code, key_code
+        );
+        Ok(())
+    }
+
+    fn on_key_released(
+        &mut self,
+        _wid: WindowId,
+        device_id: DeviceId,
+        scan_code: keyboard::ScanCode,
+        key_code: Option<keyboard::KeyCode>,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'key released' event, device: {:?}, scan code: {:?}, key code: {:?}",
+            device_id, scan_code, key_code
+        );
         Ok(())
     }
 }
