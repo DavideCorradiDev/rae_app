@@ -1,4 +1,6 @@
-use crate::event::{ControlFlow, ElementState, Event, EventHandler, EventLoop, WindowEvent};
+use crate::event::{
+    keyboard, ControlFlow, ElementState, Event, EventHandler, EventLoop, WindowEvent,
+};
 
 pub struct Application<EventHandlerType, Error, CustomEvent>
 where
@@ -6,6 +8,7 @@ where
     Error: std::fmt::Display + std::error::Error + 'static,
     CustomEvent: 'static,
 {
+    keyboard_state: [bool; 128],
     fixed_update_period: std::time::Duration,
     variable_update_min_period: std::time::Duration,
     last_fixed_update_time: std::time::Instant,
@@ -42,6 +45,7 @@ where
         let current_time = std::time::Instant::now();
 
         Self {
+            keyboard_state: [false; 128],
             fixed_update_period,
             variable_update_min_period,
             last_fixed_update_time: current_time,
@@ -119,12 +123,14 @@ where
                         device_id,
                         input.scancode,
                         input.virtual_keycode,
+                        false,
                     )?,
                     ElementState::Released => event_handler.on_key_released(
                         window_id,
                         device_id,
                         input.scancode,
                         input.virtual_keycode,
+                        false,
                     )?,
                 },
 
