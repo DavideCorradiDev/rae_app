@@ -53,7 +53,7 @@ where
     }
 
     pub fn run(mut self) {
-        let event_loop = EventLoop::<CustomEvent>::with_user_event();
+        let event_loop = EventLoop::<EventHandlerType::CustomEvent>::with_user_event();
         let mut event_handler = EventHandlerType::new(&event_loop)
             .expect("Failed to initialize the application event handler");
 
@@ -73,8 +73,8 @@ where
     fn run_frame(
         &mut self,
         event_handler: &mut EventHandlerType,
-        event: Event<CustomEvent>,
-    ) -> Result<(), Error> {
+        event: Event<EventHandlerType::CustomEvent>,
+    ) -> Result<(), EventHandlerType::Error> {
         Self::handle_event(event, event_handler)?;
 
         let current_time = std::time::Instant::now();
@@ -94,9 +94,9 @@ where
     }
 
     fn handle_event(
-        event: Event<CustomEvent>,
+        event: Event<EventHandlerType::CustomEvent>,
         event_handler: &mut EventHandlerType,
-    ) -> Result<(), Error> {
+    ) -> Result<(), EventHandlerType::Error> {
         match event {
             Event::WindowEvent { window_id, event } => match event {
                 WindowEvent::CloseRequested => {
@@ -156,9 +156,13 @@ mod tests {
         }
     }
 
+    #[derive(Debug)]
     struct MyEventHandler {}
 
     impl EventHandler<MyError, ()> for MyEventHandler {
+        type Error = MyError;
+        type CustomEvent = ();
+
         fn new(_: &EventLoop<()>) -> Result<Self, MyError> {
             Ok(Self {})
         }
@@ -166,6 +170,6 @@ mod tests {
 
     #[test]
     fn application_creation() {
-        let _app = Application::<MyEventHandler, MyError, ()>::new(10, Some(10));
+        let _app = Application::<MyEventHandler, _, _>::new(10, Some(10));
     }
 }

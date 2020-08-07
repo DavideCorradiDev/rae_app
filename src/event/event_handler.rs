@@ -1,27 +1,30 @@
 use super::{keyboard, DeviceId, EventLoop};
 use crate::window::WindowId;
 
-pub trait EventHandler<Error, CustomEvent>
+pub trait EventHandler<ErrorType, CustomEventType>
 where
     Self: std::marker::Sized,
-    Error: std::fmt::Display + std::error::Error + 'static,
-    CustomEvent: 'static,
+    ErrorType: std::fmt::Display + std::error::Error + 'static,
+    CustomEventType: 'static,
 {
-    fn new(event_loop: &EventLoop<CustomEvent>) -> Result<Self, Error>;
+    type Error: std::fmt::Display + std::error::Error + 'static;
+    type CustomEvent: 'static;
+
+    fn new(event_loop: &EventLoop<Self::CustomEvent>) -> Result<Self, Self::Error>;
 
     fn is_close_requested(&self) -> bool {
         false
     }
 
-    fn on_close_requested(&mut self, _wid: WindowId) -> Result<(), Error> {
+    fn on_close_requested(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn on_focus_gained(&mut self, _wid: WindowId) -> Result<(), Error> {
+    fn on_focus_gained(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn on_focus_lost(&mut self, _wid: WindowId) -> Result<(), Error> {
+    fn on_focus_lost(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
         Ok(())
     }
 
@@ -31,7 +34,7 @@ where
         _device_id: DeviceId,
         _scan_code: keyboard::ScanCode,
         _key_code: Option<keyboard::KeyCode>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
 
@@ -41,15 +44,15 @@ where
         _device_id: DeviceId,
         _scan_code: keyboard::ScanCode,
         _key_code: Option<keyboard::KeyCode>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn on_fixed_update(&mut self, _dt: std::time::Duration) -> Result<(), Error> {
+    fn on_fixed_update(&mut self, _dt: std::time::Duration) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn on_variable_update(&mut self, _dt: std::time::Duration) -> Result<(), Error> {
+    fn on_variable_update(&mut self, _dt: std::time::Duration) -> Result<(), Self::Error> {
         Ok(())
     }
 }
