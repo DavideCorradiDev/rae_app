@@ -112,20 +112,22 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         key_code: Option<keyboard::KeyCode>,
         is_repeat: bool,
     ) -> Result<(), Self::Error> {
-        match wid {
-            Some(id) => {
-                println!(
-                    "Processed 'key pressed' window event, \
+        if !is_repeat {
+            match wid {
+                Some(id) => {
+                    println!(
+                        "Processed 'key pressed' window event, \
                     window {:?}, device: {:?}, scan code: {:?}, key code: {:?}, repeat {:?}",
-                    id, device_id, scan_code, key_code, is_repeat
-                );
-            }
-            None => {
-                println!(
-                    "Processed 'key pressed' device event, \
+                        id, device_id, scan_code, key_code, is_repeat
+                    );
+                }
+                None => {
+                    println!(
+                        "Processed 'key pressed' device event, \
                     device: {:?}, scan code: {:?}, key code: {:?}, repeat {:?}",
-                    device_id, scan_code, key_code, is_repeat
-                );
+                        device_id, scan_code, key_code, is_repeat
+                    );
+                }
             }
         }
         Ok(())
@@ -133,17 +135,29 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
 
     fn on_key_released(
         &mut self,
-        _wid: Option<WindowId>,
+        wid: Option<WindowId>,
         device_id: DeviceId,
         scan_code: keyboard::ScanCode,
         key_code: Option<keyboard::KeyCode>,
         is_repeat: bool,
     ) -> Result<(), Self::Error> {
         if !is_repeat {
-            println!(
-                "Processed 'key released' event, device: {:?}, scan code: {:?}, key code: {:?}",
-                device_id, scan_code, key_code
-            );
+            match wid {
+                Some(id) => {
+                    println!(
+                        "Processed 'key released' window event, \
+                    window {:?}, device: {:?}, scan code: {:?}, key code: {:?}, repeat {:?}",
+                        id, device_id, scan_code, key_code, is_repeat
+                    );
+                }
+                None => {
+                    println!(
+                        "Processed 'key released' device event, \
+                    device: {:?}, scan code: {:?}, key code: {:?}, repeat {:?}",
+                        device_id, scan_code, key_code, is_repeat
+                    );
+                }
+            }
         }
         Ok(())
     }

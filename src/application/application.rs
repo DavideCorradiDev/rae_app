@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use crate::{
     event::{
         ControlFlow, DeviceEvent, DeviceId, ElementState, Event, EventHandler, EventLoop,
@@ -12,7 +14,8 @@ where
     Error: std::fmt::Display + std::error::Error + 'static,
     CustomEvent: 'static,
 {
-    keyboard_state: [ElementState; 128],
+    window_keyboard_state: [ElementState; 128],
+    device_keyboard_state: [ElementState; 128],
     fixed_update_period: std::time::Duration,
     variable_update_min_period: std::time::Duration,
     last_fixed_update_time: std::time::Instant,
@@ -49,7 +52,8 @@ where
         let current_time = std::time::Instant::now();
 
         Self {
-            keyboard_state: [ElementState::Released; 128],
+            window_keyboard_state: [ElementState::Released; 128],
+            device_keyboard_state: [ElementState::Released; 128],
             fixed_update_period,
             variable_update_min_period,
             last_fixed_update_time: current_time,
@@ -147,13 +151,22 @@ where
         device_id: DeviceId,
         key_data: &KeyboardInput,
     ) -> Result<(), EventHandlerType::Error> {
+        let key_idx = key_data.scancode as usize;
+
         // The implementation should cover all possible scan codes.
         assert!(
-            (key_data.scancode as usize) < self.keyboard_state.len(),
+            key_idx < self.window_keyboard_state.len()
+                && key_idx < self.device_keyboard_state.len(),
             "Invalid scan code {}",
             key_data.scancode
         );
-        let current_key_state = &mut self.keyboard_state[key_data.scancode as usize];
+
+        let current_key_state = if let Some(_) = window_id {
+            &mut self.window_keyboard_state[key_idx]
+        } else {
+            &mut self.device_keyboard_state[key_idx]
+        };
+
         let is_repeat = *current_key_state == key_data.state;
         *current_key_state = key_data.state;
         match key_data.state {
