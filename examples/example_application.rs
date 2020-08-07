@@ -5,17 +5,31 @@ use event::{keyboard, DeviceId, EventHandler, EventLoop};
 use window::{PhysicalSize, Size, Window, WindowBuilder, WindowId};
 
 #[derive(Debug)]
-enum ApplicationError {}
+enum ApplicationError {
+    WindowCreationError(window::OsError),
+}
 
 impl std::fmt::Display for ApplicationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Error")
+        match self {
+            ApplicationError::WindowCreationError(e) => {
+                write!(f, "Failed to create window ({})", e)
+            }
+        }
     }
 }
 
 impl std::error::Error for ApplicationError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        None
+        match self {
+            ApplicationError::WindowCreationError(e) => Some(e),
+        }
+    }
+}
+
+impl From<window::OsError> for ApplicationError {
+    fn from(e: window::OsError) -> Self {
+        ApplicationError::WindowCreationError(e)
     }
 }
 
@@ -39,8 +53,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
                 width: 800,
                 height: 600,
             }))
-            .build(event_loop)
-            .unwrap();
+            .build(event_loop)?;
         Ok(Self {
             _window: window,
             close_requested: false,
