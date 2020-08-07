@@ -1,6 +1,4 @@
-use crate::event::{
-    keyboard, ControlFlow, ElementState, Event, EventHandler, EventLoop, WindowEvent,
-};
+use crate::event::{ControlFlow, ElementState, Event, EventHandler, EventLoop, WindowEvent};
 
 pub struct Application<EventHandlerType, Error, CustomEvent>
 where
@@ -8,7 +6,7 @@ where
     Error: std::fmt::Display + std::error::Error + 'static,
     CustomEvent: 'static,
 {
-    keyboard_state: [bool; 128],
+    keyboard_state: [ElementState; 128],
     fixed_update_period: std::time::Duration,
     variable_update_min_period: std::time::Duration,
     last_fixed_update_time: std::time::Instant,
@@ -45,7 +43,7 @@ where
         let current_time = std::time::Instant::now();
 
         Self {
-            keyboard_state: [false; 128],
+            keyboard_state: [ElementState::Released; 128],
             fixed_update_period,
             variable_update_min_period,
             last_fixed_update_time: current_time,
@@ -119,35 +117,30 @@ where
                 WindowEvent::KeyboardInput {
                     device_id, input, ..
                 } => {
+                    // The implementation should cover all possible scan codes.
                     assert!(
                         (input.scancode as usize) < self.keyboard_state.len(),
                         "Invalid scan code {}",
                         input.scancode
                     );
                     let current_key_state = &mut self.keyboard_state[input.scancode as usize];
+                    let is_repeat = *current_key_state == input.state;
+                    *current_key_state = input.state;
                     match input.state {
-                        ElementState::Pressed => {
-                            let is_repeat = *current_key_state;
-                            *current_key_state = true;
-                            event_handler.on_key_pressed(
-                                window_id,
-                                device_id,
-                                input.scancode,
-                                input.virtual_keycode,
-                                is_repeat,
-                            )?
-                        }
-                        ElementState::Released => {
-                            let is_repeat = !*current_key_state;
-                            *current_key_state = false;
-                            event_handler.on_key_released(
-                                window_id,
-                                device_id,
-                                input.scancode,
-                                input.virtual_keycode,
-                                is_repeat,
-                            )?
-                        }
+                        ElementState::Pressed => event_handler.on_key_pressed(
+                            window_id,
+                            device_id,
+                            input.scancode,
+                            input.virtual_keycode,
+                            is_repeat,
+                        )?,
+                        ElementState::Released => event_handler.on_key_released(
+                            window_id,
+                            device_id,
+                            input.scancode,
+                            input.virtual_keycode,
+                            is_repeat,
+                        )?,
                     }
                 }
 
