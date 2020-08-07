@@ -1,10 +1,10 @@
 use crate::event::{ControlFlow, ElementState, Event, EventHandler, EventLoop, WindowEvent};
 
-pub struct Application<Error, CustomEvent, EventHandlerType>
+pub struct Application<EventHandlerType, Error, CustomEvent>
 where
+    EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
     Error: std::fmt::Display + std::error::Error + 'static,
     CustomEvent: 'static,
-    EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
 {
     fixed_update_period: std::time::Duration,
     variable_update_min_period: std::time::Duration,
@@ -15,11 +15,11 @@ where
     p2: std::marker::PhantomData<EventHandlerType>,
 }
 
-impl<Error, CustomEvent, EventHandlerType> Application<Error, CustomEvent, EventHandlerType>
+impl<EventHandlerType, Error, CustomEvent> Application<EventHandlerType, Error, CustomEvent>
 where
+    EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
     Error: std::fmt::Display + std::error::Error + 'static,
     CustomEvent: 'static,
-    EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
 {
     pub fn new(
         fixed_update_frequency_hz: u64,
@@ -134,5 +134,38 @@ where
             _ => (),
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[derive(Debug, PartialEq, Clone, Copy)]
+    enum MyError {}
+
+    impl std::fmt::Display for MyError {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "MyError")
+        }
+    }
+
+    impl std::error::Error for MyError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            None
+        }
+    }
+
+    struct MyEventHandler {}
+
+    impl EventHandler<MyError, ()> for MyEventHandler {
+        fn new(_: &EventLoop<()>) -> Result<Self, MyError> {
+            Ok(Self {})
+        }
+    }
+
+    #[test]
+    fn application_creation() {
+        let _app = Application::<MyEventHandler, MyError, ()>::new(10, Some(10));
     }
 }
