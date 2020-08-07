@@ -166,10 +166,19 @@ mod tests {
         fn new(_: &EventLoop<()>) -> Result<Self, MyError> {
             Ok(Self {})
         }
+
+        fn is_close_requested(&self) -> bool {
+            true
+        }
     }
 
     #[test]
     fn application_creation() {
         let _app = Application::<MyEventHandler, _, _>::new(10, Some(10));
+    }
+
+    #[test]
+    fn run() {
+        Application::<MyEventHandler, _, _>::new(10, Some(10)).run();
     }
 }
