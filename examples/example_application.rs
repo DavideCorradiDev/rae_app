@@ -20,19 +20,46 @@ impl std::error::Error for ApplicationError {
 
 struct CustomEvent {}
 
-struct ApplicationImpl {}
+struct ApplicationImpl {
+    processed_fixed_frames: u64,
+    processed_variable_frames: u64,
+}
 
 impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
     type Error = ApplicationError;
     type CustomEvent = CustomEvent;
 
     fn new(_event_loop: &EventLoop<Self::CustomEvent>) -> Result<Self, Self::Error> {
-        Ok(Self {})
+        Ok(Self {
+            processed_fixed_frames: 0,
+            processed_variable_frames: 0,
+        })
     }
 
     fn is_close_requested(&self) -> bool {
-        println!("Closing application");
-        true
+        self.processed_fixed_frames > 150
+    }
+
+    fn on_fixed_update(&mut self, dt: std::time::Duration) -> Result<(), Self::Error> {
+        if self.processed_fixed_frames % 30 == 0 {
+            println!(
+                "Fixed update called, frame {}, dt = {:?}",
+                self.processed_fixed_frames, dt
+            );
+        }
+        self.processed_fixed_frames = self.processed_fixed_frames + 1;
+        Ok(())
+    }
+
+    fn on_variable_update(&mut self, dt: std::time::Duration) -> Result<(), Self::Error> {
+        if self.processed_variable_frames % 30 == 0 {
+            println!(
+                "Variable update called, frame {}, dt = {:?}",
+                self.processed_variable_frames, dt
+            );
+        }
+        self.processed_variable_frames = self.processed_variable_frames + 1;
+        Ok(())
     }
 }
 
