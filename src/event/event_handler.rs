@@ -34,6 +34,7 @@ where
         _device_id: DeviceId,
         _scan_code: keyboard::ScanCode,
         _key_code: Option<keyboard::KeyCode>,
+        _is_repeat: bool,
     ) -> Result<(), Self::Error> {
         Ok(())
     }
@@ -44,6 +45,7 @@ where
         _device_id: DeviceId,
         _scan_code: keyboard::ScanCode,
         _key_code: Option<keyboard::KeyCode>,
+        _is_repeat: bool,
     ) -> Result<(), Self::Error> {
         Ok(())
     }

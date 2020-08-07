@@ -6,6 +6,7 @@ where
     Error: std::fmt::Display + std::error::Error + 'static,
     CustomEvent: 'static,
 {
+    keyboard_state: [ElementState; 128],
     fixed_update_period: std::time::Duration,
     variable_update_min_period: std::time::Duration,
     last_fixed_update_time: std::time::Instant,
@@ -42,6 +43,7 @@ where
         let current_time = std::time::Instant::now();
 
         Self {
+            keyboard_state: [ElementState::Released; 128],
             fixed_update_period,
             variable_update_min_period,
             last_fixed_update_time: current_time,
@@ -75,7 +77,7 @@ where
         event_handler: &mut EventHandlerType,
         event: Event<EventHandlerType::CustomEvent>,
     ) -> Result<(), EventHandlerType::Error> {
-        Self::handle_event(event, event_handler)?;
+        self.handle_event(event, event_handler)?;
 
         let current_time = std::time::Instant::now();
 
@@ -94,6 +96,7 @@ where
     }
 
     fn handle_event(
+        &mut self,
         event: Event<EventHandlerType::CustomEvent>,
         event_handler: &mut EventHandlerType,
     ) -> Result<(), EventHandlerType::Error> {
@@ -113,20 +116,33 @@ where
 
                 WindowEvent::KeyboardInput {
                     device_id, input, ..
-                } => match input.state {
-                    ElementState::Pressed => event_handler.on_key_pressed(
-                        window_id,
-                        device_id,
-                        input.scancode,
-                        input.virtual_keycode,
-                    )?,
-                    ElementState::Released => event_handler.on_key_released(
-                        window_id,
-                        device_id,
-                        input.scancode,
-                        input.virtual_keycode,
-                    )?,
-                },
+                } => {
+                    // The implementation should cover all possible scan codes.
+                    assert!(
+                        (input.scancode as usize) < self.keyboard_state.len(),
+                        "Invalid scan code {}",
+                        input.scancode
+                    );
+                    let current_key_state = &mut self.keyboard_state[input.scancode as usize];
+                    let is_repeat = *current_key_state == input.state;
+                    *current_key_state = input.state;
+                    match input.state {
+                        ElementState::Pressed => event_handler.on_key_pressed(
+                            window_id,
+                            device_id,
+                            input.scancode,
+                            input.virtual_keycode,
+                            is_repeat,
+                        )?,
+                        ElementState::Released => event_handler.on_key_released(
+                            window_id,
+                            device_id,
+                            input.scancode,
+                            input.virtual_keycode,
+                            is_repeat,
+                        )?,
+                    }
+                }
 
                 _ => (),
             },

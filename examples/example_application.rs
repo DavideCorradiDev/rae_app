@@ -110,11 +110,14 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         device_id: DeviceId,
         scan_code: keyboard::ScanCode,
         key_code: Option<keyboard::KeyCode>,
+        is_repeat: bool,
     ) -> Result<(), Self::Error> {
-        println!(
-            "Processed 'key pressed' event, device: {:?}, scan code: {:?}, key code: {:?}",
-            device_id, scan_code, key_code
-        );
+        if !is_repeat {
+            println!(
+                "Processed 'key pressed' event, device: {:?}, scan code: {:?}, key code: {:?}",
+                device_id, scan_code, key_code
+            );
+        }
         Ok(())
     }
 
@@ -124,11 +127,14 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         device_id: DeviceId,
         scan_code: keyboard::ScanCode,
         key_code: Option<keyboard::KeyCode>,
+        is_repeat: bool,
     ) -> Result<(), Self::Error> {
-        println!(
-            "Processed 'key released' event, device: {:?}, scan code: {:?}, key code: {:?}",
-            device_id, scan_code, key_code
-        );
+        if !is_repeat {
+            println!(
+                "Processed 'key released' event, device: {:?}, scan code: {:?}, key code: {:?}",
+                device_id, scan_code, key_code
+            );
+        }
         Ok(())
     }
 }
