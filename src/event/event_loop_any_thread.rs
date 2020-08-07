@@ -1,10 +1,5 @@
 extern crate winit;
 
-pub use winit::{
-    event::{DeviceEvent, DeviceId, Event, StartCause as EventLoopStartCause, WindowEvent},
-    event_loop::*,
-};
-
 #[cfg(target_os = "windows")]
 use winit::platform::windows::EventLoopExtWindows as EventLoopExt;
 

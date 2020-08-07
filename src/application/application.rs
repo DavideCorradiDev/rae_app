@@ -1,4 +1,4 @@
-use crate::{ControlFlow, Event, EventHandler, EventLoop};
+use crate::event::{ControlFlow, Event, EventHandler, EventLoop};
 
 pub struct Application {
     fixed_update_period: std::time::Duration,

@@ -1,4 +1,5 @@
-use crate::{keyboard, DeviceId, EventLoop, WindowId};
+use super::{keyboard, DeviceId, EventLoop};
+use crate::window::WindowId;
 
 pub trait EventHandler<Error, CustomEvent>
 where
