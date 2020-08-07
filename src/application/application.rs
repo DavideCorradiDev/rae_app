@@ -182,7 +182,6 @@ where
                 device_id,
                 key_data.scancode,
                 key_data.virtual_keycode,
-                is_repeat,
             )?,
         }
         Ok(())
