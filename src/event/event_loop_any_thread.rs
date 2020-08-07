@@ -1,10 +1,10 @@
 extern crate winit;
 
 #[cfg(target_os = "windows")]
-pub use winit::platform::windows::EventLoopExtWindows as EventLoopExt;
+use winit::platform::windows::EventLoopExtWindows as EventLoopExt;
 
 #[cfg(target_os = "linux")]
-pub use winit::platform::unix::EventLoopExtUnix as EventLoopExt;
+use winit::platform::unix::EventLoopExtUnix as EventLoopExt;
 
 pub trait EventLoopAnyThread<T: 'static> {
     fn new_any_thread() -> winit::event_loop::EventLoop<T>;
