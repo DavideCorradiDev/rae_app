@@ -1,4 +1,6 @@
-use crate::event::{ControlFlow, ElementState, Event, EventHandler, EventLoop, WindowEvent};
+use crate::event::{
+    ControlFlow, DeviceEvent, ElementState, Event, EventHandler, EventLoop, WindowEvent,
+};
 
 pub struct Application<EventHandlerType, Error, CustomEvent>
 where
@@ -144,6 +146,10 @@ where
                     }
                 }
 
+                _ => (),
+            },
+            Event::DeviceEvent { device_id, event } => match event {
+                DeviceEvent::Key(input) => (),
                 _ => (),
             },
 
