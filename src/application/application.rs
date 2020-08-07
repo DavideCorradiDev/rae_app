@@ -128,14 +128,14 @@ where
                     *current_key_state = input.state;
                     match input.state {
                         ElementState::Pressed => event_handler.on_key_pressed(
-                            window_id,
+                            Some(window_id),
                             device_id,
                             input.scancode,
                             input.virtual_keycode,
                             is_repeat,
                         )?,
                         ElementState::Released => event_handler.on_key_released(
-                            window_id,
+                            Some(window_id),
                             device_id,
                             input.scancode,
                             input.virtual_keycode,

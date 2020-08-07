@@ -106,7 +106,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
 
     fn on_key_pressed(
         &mut self,
-        _wid: WindowId,
+        _wid: Option<WindowId>,
         device_id: DeviceId,
         scan_code: keyboard::ScanCode,
         key_code: Option<keyboard::KeyCode>,
@@ -123,7 +123,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
 
     fn on_key_released(
         &mut self,
-        _wid: WindowId,
+        _wid: Option<WindowId>,
         device_id: DeviceId,
         scan_code: keyboard::ScanCode,
         key_code: Option<keyboard::KeyCode>,

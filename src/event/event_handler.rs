@@ -30,7 +30,7 @@ where
 
     fn on_key_pressed(
         &mut self,
-        _wid: WindowId,
+        _wid: Option<WindowId>,
         _device_id: DeviceId,
         _scan_code: keyboard::ScanCode,
         _key_code: Option<keyboard::KeyCode>,
@@ -41,7 +41,7 @@ where
 
     fn on_key_released(
         &mut self,
-        _wid: WindowId,
+        _wid: Option<WindowId>,
         _device_id: DeviceId,
         _scan_code: keyboard::ScanCode,
         _key_code: Option<keyboard::KeyCode>,
