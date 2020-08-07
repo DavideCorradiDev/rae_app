@@ -1,4 +1,4 @@
-use crate::event::{ControlFlow, Event, EventHandler, EventLoop};
+use crate::event::{ControlFlow, ElementState, Event, EventHandler, EventLoop, WindowEvent};
 
 pub struct Application {
     fixed_update_period: std::time::Duration,
@@ -96,6 +96,42 @@ impl Application {
         CustomEvent: 'static,
         EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
     {
+        match event {
+            Event::WindowEvent { window_id, event } => match event {
+                WindowEvent::CloseRequested => {
+                    event_handler.on_close_requested(window_id)?;
+                }
+
+                WindowEvent::Focused(focused) => {
+                    if focused {
+                        event_handler.on_focus_gained(window_id)?;
+                    } else {
+                        event_handler.on_focus_lost(window_id)?;
+                    }
+                }
+
+                WindowEvent::KeyboardInput {
+                    device_id, input, ..
+                } => match input.state {
+                    ElementState::Pressed => event_handler.on_key_pressed(
+                        window_id,
+                        device_id,
+                        input.scancode,
+                        input.virtual_keycode,
+                    )?,
+                    ElementState::Released => event_handler.on_key_released(
+                        window_id,
+                        device_id,
+                        input.scancode,
+                        input.virtual_keycode,
+                    )?,
+                },
+
+                _ => (),
+            },
+
+            _ => (),
+        }
         Ok(())
     }
 }
