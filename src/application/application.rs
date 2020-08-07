@@ -79,7 +79,7 @@ where
         event_handler: &mut EventHandlerType,
         event: Event<EventHandlerType::CustomEvent>,
     ) -> Result<(), EventHandlerType::Error> {
-        Self::handle_event(event, event_handler)?;
+        self.handle_event(event, event_handler)?;
 
         let current_time = std::time::Instant::now();
 
@@ -98,6 +98,7 @@ where
     }
 
     fn handle_event(
+        &mut self,
         event: Event<EventHandlerType::CustomEvent>,
         event_handler: &mut EventHandlerType,
     ) -> Result<(), EventHandlerType::Error> {
@@ -117,22 +118,38 @@ where
 
                 WindowEvent::KeyboardInput {
                     device_id, input, ..
-                } => match input.state {
-                    ElementState::Pressed => event_handler.on_key_pressed(
-                        window_id,
-                        device_id,
-                        input.scancode,
-                        input.virtual_keycode,
-                        false,
-                    )?,
-                    ElementState::Released => event_handler.on_key_released(
-                        window_id,
-                        device_id,
-                        input.scancode,
-                        input.virtual_keycode,
-                        false,
-                    )?,
-                },
+                } => {
+                    assert!(
+                        (input.scancode as usize) < self.keyboard_state.len(),
+                        "Invalid scan code {}",
+                        input.scancode
+                    );
+                    let current_key_state = &mut self.keyboard_state[input.scancode as usize];
+                    match input.state {
+                        ElementState::Pressed => {
+                            let is_repeat = *current_key_state;
+                            *current_key_state = true;
+                            event_handler.on_key_pressed(
+                                window_id,
+                                device_id,
+                                input.scancode,
+                                input.virtual_keycode,
+                                is_repeat,
+                            )?
+                        }
+                        ElementState::Released => {
+                            let is_repeat = !*current_key_state;
+                            *current_key_state = false;
+                            event_handler.on_key_released(
+                                window_id,
+                                device_id,
+                                input.scancode,
+                                input.virtual_keycode,
+                                is_repeat,
+                            )?
+                        }
+                    }
+                }
 
                 _ => (),
             },
