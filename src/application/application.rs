@@ -198,7 +198,11 @@ impl KeyboardState {
         let keyboard_state = self.state.get_mut(&key).unwrap();
         // Assuming at most a certain number of scancodes. Asserting just for safety.
         let key_idx = scan_code as usize;
-        assert!(key_idx < 128, "Invalid scan code {}", key_idx);
+        assert!(
+            key_idx < keyboard_state.len(),
+            "Invalid scan code {}",
+            key_idx
+        );
         &mut keyboard_state[key_idx]
     }
 }
