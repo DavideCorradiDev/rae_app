@@ -2,6 +2,7 @@ use rae_app::*;
 
 use application::Application;
 use event::{EventHandler, EventLoop};
+use window::{PhysicalSize, Size, Window, WindowBuilder, WindowId};
 
 #[derive(Debug)]
 enum ApplicationError {}
@@ -21,6 +22,8 @@ impl std::error::Error for ApplicationError {
 struct CustomEvent {}
 
 struct ApplicationImpl {
+    window: Window,
+    close_requested: bool,
     processed_fixed_frames: u64,
     processed_variable_frames: u64,
 }
@@ -29,15 +32,31 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
     type Error = ApplicationError;
     type CustomEvent = CustomEvent;
 
-    fn new(_event_loop: &EventLoop<Self::CustomEvent>) -> Result<Self, Self::Error> {
+    fn new(event_loop: &EventLoop<Self::CustomEvent>) -> Result<Self, Self::Error> {
+        let window = WindowBuilder::new()
+            .with_title("Example application")
+            .with_inner_size(Size::Physical(PhysicalSize {
+                width: 800,
+                height: 600,
+            }))
+            .build(event_loop)
+            .unwrap();
         Ok(Self {
+            window,
+            close_requested: false,
             processed_fixed_frames: 0,
             processed_variable_frames: 0,
         })
     }
 
     fn is_close_requested(&self) -> bool {
-        self.processed_fixed_frames > 150
+        self.close_requested
+    }
+
+    fn on_close_requested(&mut self, _: WindowId) -> Result<(), Self::Error> {
+        self.close_requested = true;
+        println!("Processed 'close requested' event.");
+        Ok(())
     }
 
     fn on_fixed_update(&mut self, dt: std::time::Duration) -> Result<(), Self::Error> {
