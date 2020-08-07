@@ -1,5 +1,9 @@
-use crate::event::{
-    ControlFlow, DeviceEvent, ElementState, Event, EventHandler, EventLoop, WindowEvent,
+use crate::{
+    event::{
+        ControlFlow, DeviceEvent, DeviceId, ElementState, Event, EventHandler, EventLoop,
+        KeyboardInput, WindowEvent,
+    },
+    window::WindowId,
 };
 
 pub struct Application<EventHandlerType, Error, CustomEvent>
@@ -118,42 +122,55 @@ where
 
                 WindowEvent::KeyboardInput {
                     device_id, input, ..
-                } => {
-                    // The implementation should cover all possible scan codes.
-                    assert!(
-                        (input.scancode as usize) < self.keyboard_state.len(),
-                        "Invalid scan code {}",
-                        input.scancode
-                    );
-                    let current_key_state = &mut self.keyboard_state[input.scancode as usize];
-                    let is_repeat = *current_key_state == input.state;
-                    *current_key_state = input.state;
-                    match input.state {
-                        ElementState::Pressed => event_handler.on_key_pressed(
-                            Some(window_id),
-                            device_id,
-                            input.scancode,
-                            input.virtual_keycode,
-                            is_repeat,
-                        )?,
-                        ElementState::Released => event_handler.on_key_released(
-                            Some(window_id),
-                            device_id,
-                            input.scancode,
-                            input.virtual_keycode,
-                            is_repeat,
-                        )?,
-                    }
+                } => self.handle_key_event(event_handler, Some(window_id), device_id, &input)?,
+
+                _ => (),
+            },
+
+            Event::DeviceEvent { device_id, event } => match event {
+                DeviceEvent::Key(input) => {
+                    self.handle_key_event(event_handler, None, device_id, &input)?
                 }
 
                 _ => (),
             },
-            Event::DeviceEvent { device_id, event } => match event {
-                DeviceEvent::Key(input) => (),
-                _ => (),
-            },
 
             _ => (),
+        }
+        Ok(())
+    }
+
+    fn handle_key_event(
+        &mut self,
+        event_handler: &mut EventHandlerType,
+        window_id: Option<WindowId>,
+        device_id: DeviceId,
+        key_data: &KeyboardInput,
+    ) -> Result<(), EventHandlerType::Error> {
+        // The implementation should cover all possible scan codes.
+        assert!(
+            (key_data.scancode as usize) < self.keyboard_state.len(),
+            "Invalid scan code {}",
+            key_data.scancode
+        );
+        let current_key_state = &mut self.keyboard_state[key_data.scancode as usize];
+        let is_repeat = *current_key_state == key_data.state;
+        *current_key_state = key_data.state;
+        match key_data.state {
+            ElementState::Pressed => event_handler.on_key_pressed(
+                window_id,
+                device_id,
+                key_data.scancode,
+                key_data.virtual_keycode,
+                is_repeat,
+            )?,
+            ElementState::Released => event_handler.on_key_released(
+                window_id,
+                device_id,
+                key_data.scancode,
+                key_data.virtual_keycode,
+                is_repeat,
+            )?,
         }
         Ok(())
     }
