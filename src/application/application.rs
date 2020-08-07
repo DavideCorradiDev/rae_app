@@ -1,13 +1,26 @@
 use crate::event::{ControlFlow, ElementState, Event, EventHandler, EventLoop, WindowEvent};
 
-pub struct Application {
+pub struct Application<Error, CustomEvent, EventHandlerType>
+where
+    Error: std::fmt::Display + std::error::Error + 'static,
+    CustomEvent: 'static,
+    EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
+{
     fixed_update_period: std::time::Duration,
     variable_update_min_period: std::time::Duration,
     last_fixed_update_time: std::time::Instant,
     last_variable_update_time: std::time::Instant,
+    p0: std::marker::PhantomData<Error>,
+    p1: std::marker::PhantomData<CustomEvent>,
+    p2: std::marker::PhantomData<EventHandlerType>,
 }
 
-impl Application {
+impl<Error, CustomEvent, EventHandlerType> Application<Error, CustomEvent, EventHandlerType>
+where
+    Error: std::fmt::Display + std::error::Error + 'static,
+    CustomEvent: 'static,
+    EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
+{
     pub fn new(
         fixed_update_frequency_hz: u64,
         variable_update_max_frequency_hz: Option<u64>,
@@ -33,15 +46,13 @@ impl Application {
             variable_update_min_period,
             last_fixed_update_time: current_time,
             last_variable_update_time: current_time,
+            p0: std::marker::PhantomData,
+            p1: std::marker::PhantomData,
+            p2: std::marker::PhantomData,
         }
     }
 
-    pub fn run<Error, CustomEvent, EventHandlerType>(mut self)
-    where
-        Error: std::fmt::Display + std::error::Error + 'static,
-        CustomEvent: 'static,
-        EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
-    {
+    pub fn run(mut self) {
         let event_loop = EventLoop::<CustomEvent>::with_user_event();
         let mut event_handler = EventHandlerType::new(&event_loop)
             .expect("Failed to initialize the application event handler");
@@ -59,16 +70,11 @@ impl Application {
         });
     }
 
-    fn run_frame<Error, CustomEvent, EventHandlerType>(
+    fn run_frame(
         &mut self,
         event_handler: &mut EventHandlerType,
         event: Event<CustomEvent>,
-    ) -> Result<(), Error>
-    where
-        Error: std::fmt::Display + std::error::Error + 'static,
-        CustomEvent: 'static,
-        EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
-    {
+    ) -> Result<(), Error> {
         Self::handle_event(event, event_handler)?;
 
         let current_time = std::time::Instant::now();
@@ -87,15 +93,10 @@ impl Application {
         Ok(())
     }
 
-    fn handle_event<Error, CustomEvent, EventHandlerType>(
+    fn handle_event(
         event: Event<CustomEvent>,
         event_handler: &mut EventHandlerType,
-    ) -> Result<(), Error>
-    where
-        Error: std::fmt::Display + std::error::Error + 'static,
-        CustomEvent: 'static,
-        EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
-    {
+    ) -> Result<(), Error> {
         match event {
             Event::WindowEvent { window_id, event } => match event {
                 WindowEvent::CloseRequested => {
