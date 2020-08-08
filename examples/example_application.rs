@@ -88,7 +88,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_window_close_requested(&mut self, wid: WindowId) -> Result<(), Self::Error> {
+    fn on_close_requested(&mut self, wid: WindowId) -> Result<(), Self::Error> {
         self.close_requested = true;
         println!(
             "Processed 'window close requested' event, window {:?}.",
@@ -97,23 +97,23 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_window_destroyed(&mut self, wid: WindowId) -> Result<(), Self::Error> {
+    fn on_destroyed(&mut self, wid: WindowId) -> Result<(), Self::Error> {
         self.close_requested = true;
         println!("Processed 'window destroyed' event, window {:?}.", wid);
         Ok(())
     }
 
-    fn on_window_focus_gained(&mut self, wid: WindowId) -> Result<(), Self::Error> {
+    fn on_focus_gained(&mut self, wid: WindowId) -> Result<(), Self::Error> {
         println!("Processed 'window focus gained' event, window {:?}", wid);
         Ok(())
     }
 
-    fn on_window_focus_lost(&mut self, wid: WindowId) -> Result<(), Self::Error> {
+    fn on_focus_lost(&mut self, wid: WindowId) -> Result<(), Self::Error> {
         println!("Processed 'window focus lost' event, window {:?}", wid);
         Ok(())
     }
 
-    fn on_window_received_character(&mut self, wid: WindowId, c: char) -> Result<(), Self::Error> {
+    fn on_received_character(&mut self, wid: WindowId, c: char) -> Result<(), Self::Error> {
         println!(
             "Processed 'window received character' event, window {:?}, character {:?}",
             wid, c
@@ -121,11 +121,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_window_resized(
-        &mut self,
-        wid: WindowId,
-        size: PhysicalSize<u32>,
-    ) -> Result<(), Self::Error> {
+    fn on_resized(&mut self, wid: WindowId, size: PhysicalSize<u32>) -> Result<(), Self::Error> {
         println!(
             "Processed 'window resized' event, window {:?}, size {:?}",
             wid, size
@@ -133,7 +129,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_window_moved(
+    fn on_moved(
         &mut self,
         wid: WindowId,
         position: PhysicalPosition<i32>,
@@ -145,7 +141,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_window_key_pressed(
+    fn on_key_pressed(
         &mut self,
         wid: WindowId,
         device_id: DeviceId,
@@ -181,7 +177,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_window_key_released(
+    fn on_key_released(
         &mut self,
         wid: WindowId,
         device_id: DeviceId,
@@ -211,7 +207,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_window_modifiers_changed(
+    fn on_modifiers_changed(
         &mut self,
         wid: WindowId,
         modifiers_state: keyboard::ModifiersState,

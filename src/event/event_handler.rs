@@ -16,31 +16,27 @@ where
         false
     }
 
-    fn on_window_close_requested(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
+    fn on_close_requested(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn on_window_destroyed(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
+    fn on_destroyed(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn on_window_focus_gained(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
+    fn on_focus_gained(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn on_window_focus_lost(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
+    fn on_focus_lost(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn on_window_resized(
-        &mut self,
-        _wid: WindowId,
-        _size: PhysicalSize<u32>,
-    ) -> Result<(), Self::Error> {
+    fn on_resized(&mut self, _wid: WindowId, _size: PhysicalSize<u32>) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn on_window_moved(
+    fn on_moved(
         &mut self,
         _wid: WindowId,
         _position: PhysicalPosition<i32>,
@@ -48,15 +44,11 @@ where
         Ok(())
     }
 
-    fn on_window_received_character(
-        &mut self,
-        _wid: WindowId,
-        _c: char,
-    ) -> Result<(), Self::Error> {
+    fn on_received_character(&mut self, _wid: WindowId, _c: char) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn on_window_key_pressed(
+    fn on_key_pressed(
         &mut self,
         _wid: WindowId,
         _device_id: DeviceId,
@@ -78,7 +70,7 @@ where
         Ok(())
     }
 
-    fn on_window_key_released(
+    fn on_key_released(
         &mut self,
         _wid: WindowId,
         _device_id: DeviceId,
@@ -98,7 +90,7 @@ where
         Ok(())
     }
 
-    fn on_window_modifiers_changed(
+    fn on_modifiers_changed(
         &mut self,
         _wid: WindowId,
         _modifiers_state: keyboard::ModifiersState,

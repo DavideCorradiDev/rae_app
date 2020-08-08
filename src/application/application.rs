@@ -110,19 +110,17 @@ where
     ) -> Result<(), EventHandlerType::Error> {
         match event {
             Event::WindowEvent { window_id, event } => match event {
-                WindowEvent::CloseRequested => eh.on_window_close_requested(window_id)?,
-                WindowEvent::Destroyed => eh.on_window_destroyed(window_id)?,
-                WindowEvent::Resized(size) => eh.on_window_resized(window_id, size)?,
-                WindowEvent::Moved(pos) => eh.on_window_moved(window_id, pos)?,
-                WindowEvent::ReceivedCharacter(c) => {
-                    eh.on_window_received_character(window_id, c)?
-                }
+                WindowEvent::CloseRequested => eh.on_close_requested(window_id)?,
+                WindowEvent::Destroyed => eh.on_destroyed(window_id)?,
+                WindowEvent::Resized(size) => eh.on_resized(window_id, size)?,
+                WindowEvent::Moved(pos) => eh.on_moved(window_id, pos)?,
+                WindowEvent::ReceivedCharacter(c) => eh.on_received_character(window_id, c)?,
 
                 WindowEvent::Focused(focused) => {
                     if focused {
-                        eh.on_window_focus_gained(window_id)?;
+                        eh.on_focus_gained(window_id)?;
                     } else {
-                        eh.on_window_focus_lost(window_id)?;
+                        eh.on_focus_lost(window_id)?;
                     }
                 }
 
@@ -130,13 +128,9 @@ where
                     device_id,
                     input,
                     is_synthetic,
-                } => {
-                    self.handle_window_key_event(eh, window_id, device_id, &input, is_synthetic)?
-                }
+                } => self.handle_key_event(eh, window_id, device_id, &input, is_synthetic)?,
 
-                WindowEvent::ModifiersChanged(mods) => {
-                    eh.on_window_modifiers_changed(window_id, mods)?
-                }
+                WindowEvent::ModifiersChanged(mods) => eh.on_modifiers_changed(window_id, mods)?,
 
                 _ => (),
             },
@@ -152,7 +146,7 @@ where
         Ok(())
     }
 
-    fn handle_window_key_event(
+    fn handle_key_event(
         &mut self,
         eh: &mut EventHandlerType,
         window_id: WindowId,
@@ -166,7 +160,7 @@ where
         let is_repeat = *last_key_state == key_data.state;
         *last_key_state = key_data.state;
         match key_data.state {
-            ElementState::Pressed => eh.on_window_key_pressed(
+            ElementState::Pressed => eh.on_key_pressed(
                 window_id,
                 device_id,
                 key_data.scancode,
@@ -174,7 +168,7 @@ where
                 is_synthetic,
                 is_repeat,
             )?,
-            ElementState::Released => eh.on_window_key_released(
+            ElementState::Released => eh.on_key_released(
                 window_id,
                 device_id,
                 key_data.scancode,
