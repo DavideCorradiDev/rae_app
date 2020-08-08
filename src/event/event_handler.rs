@@ -1,4 +1,4 @@
-use super::{event::ScrollDelta, keyboard, mouse, touch, DeviceId, EventLoop};
+use super::{controller, event::ScrollDelta, keyboard, mouse, touch, DeviceId, EventLoop};
 use crate::window::{PhysicalPosition, PhysicalSize, WindowId};
 
 pub trait EventHandler<ErrorType, CustomEventType>
@@ -155,6 +155,16 @@ where
         _location: PhysicalPosition<f64>,
         _force: Option<touch::Force>,
         _id: u64,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_axis_motion(
+        &mut self,
+        _wid: WindowId,
+        _device_id: DeviceId,
+        _axis: controller::AxisId,
+        _value: f64,
     ) -> Result<(), Self::Error> {
         Ok(())
     }

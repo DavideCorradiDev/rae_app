@@ -178,6 +178,12 @@ where
                     touch.id,
                 )?,
 
+                WindowEvent::AxisMotion {
+                    device_id,
+                    axis,
+                    value,
+                } => eh.on_axis_motion(window_id, device_id, axis, value)?,
+
                 _ => (),
             },
 

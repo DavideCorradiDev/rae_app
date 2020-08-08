@@ -1,7 +1,7 @@
 use rae_app::*;
 
 use application::Application;
-use event::{keyboard, mouse, touch, DeviceId, EventHandler, EventLoop, ScrollDelta};
+use event::{controller, keyboard, mouse, touch, DeviceId, EventHandler, EventLoop, ScrollDelta};
 use window::{PhysicalPosition, PhysicalSize, Size, Window, WindowBuilder, WindowId};
 
 #[derive(Debug)]
@@ -284,6 +284,20 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         println!(
             "Processed 'scroll' event, window {:?}, device {:?}, delta {:?}, phase {:?}",
             wid, device_id, delta, phase
+        );
+        Ok(())
+    }
+
+    fn on_axis_motion(
+        &mut self,
+        wid: WindowId,
+        device_id: DeviceId,
+        axis: controller::AxisId,
+        value: f64,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'axis motion' event, window {:?}, device {:?}, axis {:?}, value {:?}",
+            wid, device_id, axis, value
         );
         Ok(())
     }
