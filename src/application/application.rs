@@ -127,8 +127,12 @@ where
                 }
 
                 WindowEvent::KeyboardInput {
-                    device_id, input, ..
-                } => self.handle_window_key_event(eh, window_id, device_id, &input)?,
+                    device_id,
+                    input,
+                    is_synthetic,
+                } => {
+                    self.handle_window_key_event(eh, window_id, device_id, &input, is_synthetic)?
+                }
 
                 _ => (),
             },
@@ -150,6 +154,7 @@ where
         window_id: WindowId,
         device_id: DeviceId,
         key_data: &KeyboardInput,
+        is_synthetic: bool,
     ) -> Result<(), EventHandlerType::Error> {
         let last_key_state =
             self.keyboard_state
@@ -162,6 +167,7 @@ where
                 device_id,
                 key_data.scancode,
                 key_data.virtual_keycode,
+                is_synthetic,
                 is_repeat,
             )?,
             ElementState::Released => eh.on_window_key_released(
@@ -169,6 +175,7 @@ where
                 device_id,
                 key_data.scancode,
                 key_data.virtual_keycode,
+                is_synthetic,
             )?,
         }
         Ok(())

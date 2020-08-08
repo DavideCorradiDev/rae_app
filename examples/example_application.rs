@@ -151,13 +151,14 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         device_id: DeviceId,
         scan_code: keyboard::ScanCode,
         key_code: Option<keyboard::KeyCode>,
+        is_synthetic: bool,
         is_repeat: bool,
     ) -> Result<(), Self::Error> {
         if !is_repeat {
             println!(
                 "Processed 'window key pressed' event, \
-                window {:?}, device: {:?}, scan code: {:?}, key code: {:?}, repeat {:?}",
-                wid, device_id, scan_code, key_code, is_repeat
+                window {:?}, device: {:?}, scan code: {:?}, key code: {:?}, repeat {:?}, synthetic {:?}",
+                wid, device_id, scan_code, key_code, is_repeat, is_synthetic
             );
         }
         Ok(())
@@ -186,11 +187,12 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         device_id: DeviceId,
         scan_code: keyboard::ScanCode,
         key_code: Option<keyboard::KeyCode>,
+        is_synthetic: bool,
     ) -> Result<(), Self::Error> {
         println!(
             "Processed 'window key released' device event, \
-            window: {:?}, device: {:?}, scan code: {:?}, key code: {:?}",
-            wid, device_id, scan_code, key_code,
+            window: {:?}, device: {:?}, scan code: {:?}, key code: {:?}, synthetic {:?}",
+            wid, device_id, scan_code, key_code, is_synthetic
         );
         Ok(())
     }
