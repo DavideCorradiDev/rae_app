@@ -169,6 +169,15 @@ where
                     ..
                 } => eh.on_scroll(window_id, device_id, delta, phase)?,
 
+                WindowEvent::Touch(touch) => eh.on_touch(
+                    window_id,
+                    touch.device_id,
+                    touch.phase,
+                    touch.location,
+                    touch.force,
+                    touch.id,
+                )?,
+
                 _ => (),
             },
 

@@ -147,6 +147,18 @@ where
         Ok(())
     }
 
+    fn on_touch(
+        &mut self,
+        _wid: WindowId,
+        _device_id: DeviceId,
+        _phase: touch::TouchPhase,
+        _location: PhysicalPosition<f64>,
+        _force: Option<touch::Force>,
+        _id: u64,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
     fn on_fixed_update(&mut self, _dt: std::time::Duration) -> Result<(), Self::Error> {
         Ok(())
     }

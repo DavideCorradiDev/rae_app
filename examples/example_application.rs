@@ -287,6 +287,23 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         );
         Ok(())
     }
+
+    fn on_touch(
+        &mut self,
+        wid: WindowId,
+        device_id: DeviceId,
+        phase: touch::TouchPhase,
+        location: PhysicalPosition<f64>,
+        force: Option<touch::Force>,
+        id: u64,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'on touch' event, \
+            window {:?}, device {:?}, phase {:?}, location {:?}, force {:?}, id {:?}",
+            wid, device_id, phase, location, force, id
+        );
+        Ok(())
+    }
 }
 
 fn main() {
