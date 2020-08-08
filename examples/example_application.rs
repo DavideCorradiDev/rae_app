@@ -66,12 +66,6 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         self.close_requested
     }
 
-    fn on_close_requested(&mut self, _: WindowId) -> Result<(), Self::Error> {
-        self.close_requested = true;
-        println!("Processed 'close requested' event.");
-        Ok(())
-    }
-
     fn on_fixed_update(&mut self, dt: std::time::Duration) -> Result<(), Self::Error> {
         if self.processed_fixed_frames % 30 == 0 {
             println!(
@@ -94,37 +88,47 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_focus_gained(&mut self, _: WindowId) -> Result<(), Self::Error> {
-        println!("Processed 'focus gained' event");
+    fn on_window_close_requested(&mut self, _: WindowId) -> Result<(), Self::Error> {
+        self.close_requested = true;
+        println!("Processed 'window close requested' event.");
         Ok(())
     }
 
-    fn on_focus_lost(&mut self, _: WindowId) -> Result<(), Self::Error> {
-        println!("Processed 'focus lost' event");
+    fn on_window_focus_gained(&mut self, _: WindowId) -> Result<(), Self::Error> {
+        println!("Processed 'window focus gained' event");
         Ok(())
     }
 
-    fn on_resized(&mut self, wid: WindowId, size: PhysicalSize<u32>) -> Result<(), Self::Error> {
+    fn on_window_focus_lost(&mut self, _: WindowId) -> Result<(), Self::Error> {
+        println!("Processed 'window focus lost' event");
+        Ok(())
+    }
+
+    fn on_window_resized(
+        &mut self,
+        wid: WindowId,
+        size: PhysicalSize<u32>,
+    ) -> Result<(), Self::Error> {
         println!(
-            "Processed 'resized' event, window {:?}, size {:?}",
+            "Processed 'window resized' event, window {:?}, size {:?}",
             wid, size
         );
         Ok(())
     }
 
-    fn on_moved(
+    fn on_window_moved(
         &mut self,
         wid: WindowId,
         position: PhysicalPosition<i32>,
     ) -> Result<(), Self::Error> {
         println!(
-            "Processed 'moved' event, window {:?}, position {:?}",
+            "Processed 'window moved' event, window {:?}, position {:?}",
             wid, position
         );
         Ok(())
     }
 
-    fn on_key_pressed(
+    fn on_window_key_pressed(
         &mut self,
         wid: WindowId,
         device_id: DeviceId,
@@ -134,7 +138,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
     ) -> Result<(), Self::Error> {
         if !is_repeat {
             println!(
-                "Processed 'key pressed' event, \
+                "Processed 'window key pressed' event, \
                 window {:?}, device: {:?}, scan code: {:?}, key code: {:?}, repeat {:?}",
                 wid, device_id, scan_code, key_code, is_repeat
             );
@@ -159,7 +163,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_key_released(
+    fn on_window_key_released(
         &mut self,
         wid: WindowId,
         device_id: DeviceId,
@@ -167,7 +171,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         key_code: Option<keyboard::KeyCode>,
     ) -> Result<(), Self::Error> {
         println!(
-            "Processed 'key released' device event, \
+            "Processed 'window key released' device event, \
             window: {:?}, device: {:?}, scan code: {:?}, key code: {:?}",
             wid, device_id, scan_code, key_code,
         );

@@ -111,18 +111,18 @@ where
         match event {
             Event::WindowEvent { window_id, event } => match event {
                 WindowEvent::CloseRequested => {
-                    event_handler.on_close_requested(window_id)?;
+                    event_handler.on_window_close_requested(window_id)?;
                 }
 
-                WindowEvent::Resized(size) => event_handler.on_resized(window_id, size)?,
+                WindowEvent::Resized(size) => event_handler.on_window_resized(window_id, size)?,
 
-                WindowEvent::Moved(pos) => event_handler.on_moved(window_id, pos)?,
+                WindowEvent::Moved(pos) => event_handler.on_window_moved(window_id, pos)?,
 
                 WindowEvent::Focused(focused) => {
                     if focused {
-                        event_handler.on_focus_gained(window_id)?;
+                        event_handler.on_window_focus_gained(window_id)?;
                     } else {
-                        event_handler.on_focus_lost(window_id)?;
+                        event_handler.on_window_focus_lost(window_id)?;
                     }
                 }
 
@@ -159,14 +159,14 @@ where
         let is_repeat = *last_key_state == key_data.state;
         *last_key_state = key_data.state;
         match key_data.state {
-            ElementState::Pressed => event_handler.on_key_pressed(
+            ElementState::Pressed => event_handler.on_window_key_pressed(
                 window_id,
                 device_id,
                 key_data.scancode,
                 key_data.virtual_keycode,
                 is_repeat,
             )?,
-            ElementState::Released => event_handler.on_key_released(
+            ElementState::Released => event_handler.on_window_key_released(
                 window_id,
                 device_id,
                 key_data.scancode,
