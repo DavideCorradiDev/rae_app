@@ -116,6 +116,11 @@ where
 
                 WindowEvent::Resized(size) => eh.on_resized(window_id, size)?,
 
+                WindowEvent::ScaleFactorChanged {
+                    scale_factor,
+                    new_inner_size,
+                } => eh.on_scale_factor_changed(window_id, scale_factor, new_inner_size)?,
+
                 WindowEvent::Moved(pos) => eh.on_moved(window_id, pos)?,
 
                 WindowEvent::ReceivedCharacter(c) => eh.on_received_character(window_id, c)?,

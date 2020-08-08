@@ -90,32 +90,29 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
 
     fn on_close_requested(&mut self, wid: WindowId) -> Result<(), Self::Error> {
         self.close_requested = true;
-        println!(
-            "Processed 'window close requested' event, window {:?}.",
-            wid
-        );
+        println!("Processed 'close requested' event, window {:?}.", wid);
         Ok(())
     }
 
     fn on_destroyed(&mut self, wid: WindowId) -> Result<(), Self::Error> {
         self.close_requested = true;
-        println!("Processed 'window destroyed' event, window {:?}.", wid);
+        println!("Processed 'destroyed' event, window {:?}.", wid);
         Ok(())
     }
 
     fn on_focus_gained(&mut self, wid: WindowId) -> Result<(), Self::Error> {
-        println!("Processed 'window focus gained' event, window {:?}", wid);
+        println!("Processed 'focus gained' event, window {:?}", wid);
         Ok(())
     }
 
     fn on_focus_lost(&mut self, wid: WindowId) -> Result<(), Self::Error> {
-        println!("Processed 'window focus lost' event, window {:?}", wid);
+        println!("Processed 'focus lost' event, window {:?}", wid);
         Ok(())
     }
 
     fn on_received_character(&mut self, wid: WindowId, c: char) -> Result<(), Self::Error> {
         println!(
-            "Processed 'window received character' event, window {:?}, character {:?}",
+            "Processed 'received character' event, window {:?}, character {:?}",
             wid, c
         );
         Ok(())
@@ -123,8 +120,21 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
 
     fn on_resized(&mut self, wid: WindowId, size: PhysicalSize<u32>) -> Result<(), Self::Error> {
         println!(
-            "Processed 'window resized' event, window {:?}, size {:?}",
+            "Processed 'resized' event, window {:?}, size {:?}",
             wid, size
+        );
+        Ok(())
+    }
+
+    fn on_scale_factor_changed<'a>(
+        &self,
+        wid: WindowId,
+        scale_factor: f64,
+        new_inner_size: &'a mut PhysicalSize<u32>,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'scale factor changed' event, window {:?}, scale_factor {:?}, new size {:?}",
+            wid, scale_factor, *new_inner_size
         );
         Ok(())
     }

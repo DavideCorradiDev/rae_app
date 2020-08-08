@@ -36,6 +36,15 @@ where
         Ok(())
     }
 
+    fn on_scale_factor_changed<'a>(
+        &self,
+        _wid: WindowId,
+        _scale_factor: f64,
+        _new_inner_size: &'a mut PhysicalSize<u32>,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
     fn on_moved(
         &mut self,
         _wid: WindowId,
