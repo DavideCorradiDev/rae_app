@@ -82,21 +82,21 @@ where
 
     fn run_frame(
         &mut self,
-        event_handler: &mut EventHandlerType,
+        eh: &mut EventHandlerType,
         event: Event<EventHandlerType::CustomEvent>,
     ) -> Result<(), EventHandlerType::Error> {
-        self.handle_event(event, event_handler)?;
+        self.handle_event(event, eh)?;
 
         let current_time = std::time::Instant::now();
 
         while current_time - self.last_fixed_update_time >= self.fixed_update_period {
-            event_handler.on_fixed_update(self.fixed_update_period)?;
+            eh.on_fixed_update(self.fixed_update_period)?;
             self.last_fixed_update_time += self.fixed_update_period;
         }
 
         let time_since_last_variable_update = current_time - self.last_variable_update_time;
         if time_since_last_variable_update > self.variable_update_min_period {
-            event_handler.on_variable_update(time_since_last_variable_update)?;
+            eh.on_variable_update(time_since_last_variable_update)?;
             self.last_variable_update_time = current_time;
         }
 
@@ -106,37 +106,31 @@ where
     fn handle_event(
         &mut self,
         event: Event<EventHandlerType::CustomEvent>,
-        event_handler: &mut EventHandlerType,
+        eh: &mut EventHandlerType,
     ) -> Result<(), EventHandlerType::Error> {
         match event {
             Event::WindowEvent { window_id, event } => match event {
-                WindowEvent::CloseRequested => {
-                    event_handler.on_window_close_requested(window_id)?;
-                }
-
-                WindowEvent::Resized(size) => event_handler.on_window_resized(window_id, size)?,
-
-                WindowEvent::Moved(pos) => event_handler.on_window_moved(window_id, pos)?,
+                WindowEvent::CloseRequested => eh.on_window_close_requested(window_id)?,
+                WindowEvent::Resized(size) => eh.on_window_resized(window_id, size)?,
+                WindowEvent::Moved(pos) => eh.on_window_moved(window_id, pos)?,
 
                 WindowEvent::Focused(focused) => {
                     if focused {
-                        event_handler.on_window_focus_gained(window_id)?;
+                        eh.on_window_focus_gained(window_id)?;
                     } else {
-                        event_handler.on_window_focus_lost(window_id)?;
+                        eh.on_window_focus_lost(window_id)?;
                     }
                 }
 
                 WindowEvent::KeyboardInput {
                     device_id, input, ..
-                } => self.handle_window_key_event(event_handler, window_id, device_id, &input)?,
+                } => self.handle_window_key_event(eh, window_id, device_id, &input)?,
 
                 _ => (),
             },
 
             Event::DeviceEvent { device_id, event } => match event {
-                DeviceEvent::Key(input) => {
-                    self.handle_device_key_event(event_handler, device_id, &input)?
-                }
+                DeviceEvent::Key(input) => self.handle_device_key_event(eh, device_id, &input)?,
 
                 _ => (),
             },
@@ -148,7 +142,7 @@ where
 
     fn handle_window_key_event(
         &mut self,
-        event_handler: &mut EventHandlerType,
+        eh: &mut EventHandlerType,
         window_id: WindowId,
         device_id: DeviceId,
         key_data: &KeyboardInput,
@@ -159,14 +153,14 @@ where
         let is_repeat = *last_key_state == key_data.state;
         *last_key_state = key_data.state;
         match key_data.state {
-            ElementState::Pressed => event_handler.on_window_key_pressed(
+            ElementState::Pressed => eh.on_window_key_pressed(
                 window_id,
                 device_id,
                 key_data.scancode,
                 key_data.virtual_keycode,
                 is_repeat,
             )?,
-            ElementState::Released => event_handler.on_window_key_released(
+            ElementState::Released => eh.on_window_key_released(
                 window_id,
                 device_id,
                 key_data.scancode,
@@ -178,7 +172,7 @@ where
 
     fn handle_device_key_event(
         &mut self,
-        event_handler: &mut EventHandlerType,
+        eh: &mut EventHandlerType,
         device_id: DeviceId,
         key_data: &KeyboardInput,
     ) -> Result<(), EventHandlerType::Error> {
@@ -188,17 +182,15 @@ where
         let is_repeat = *last_key_state == key_data.state;
         *last_key_state = key_data.state;
         match key_data.state {
-            ElementState::Pressed => event_handler.on_device_key_pressed(
+            ElementState::Pressed => eh.on_device_key_pressed(
                 device_id,
                 key_data.scancode,
                 key_data.virtual_keycode,
                 is_repeat,
             )?,
-            ElementState::Released => event_handler.on_device_key_released(
-                device_id,
-                key_data.scancode,
-                key_data.virtual_keycode,
-            )?,
+            ElementState::Released => {
+                eh.on_device_key_released(device_id, key_data.scancode, key_data.virtual_keycode)?
+            }
         }
         Ok(())
     }
