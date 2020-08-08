@@ -1,5 +1,5 @@
 use super::{keyboard, DeviceId, EventLoop};
-use crate::window::WindowId;
+use crate::window::{PhysicalPosition, PhysicalSize, WindowId};
 
 pub trait EventHandler<ErrorType, CustomEventType>
 where
@@ -25,6 +25,18 @@ where
     }
 
     fn on_focus_lost(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_resized(&mut self, _wid: WindowId, _size: PhysicalSize<u32>) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_moved(
+        &mut self,
+        _wid: WindowId,
+        _position: PhysicalPosition<i32>,
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
 

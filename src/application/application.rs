@@ -114,6 +114,10 @@ where
                     event_handler.on_close_requested(window_id)?;
                 }
 
+                WindowEvent::Resized(size) => event_handler.on_resized(window_id, size)?,
+
+                WindowEvent::Moved(pos) => event_handler.on_moved(window_id, pos)?,
+
                 WindowEvent::Focused(focused) => {
                     if focused {
                         event_handler.on_focus_gained(window_id)?;

@@ -2,7 +2,7 @@ use rae_app::*;
 
 use application::Application;
 use event::{keyboard, DeviceId, EventHandler, EventLoop};
-use window::{PhysicalSize, Size, Window, WindowBuilder, WindowId};
+use window::{PhysicalPosition, PhysicalSize, Size, Window, WindowBuilder, WindowId};
 
 #[derive(Debug)]
 enum ApplicationError {
@@ -101,6 +101,26 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
 
     fn on_focus_lost(&mut self, _: WindowId) -> Result<(), Self::Error> {
         println!("Processed 'focus lost' event");
+        Ok(())
+    }
+
+    fn on_resized(&mut self, wid: WindowId, size: PhysicalSize<u32>) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'resized' event, window {:?}, size {:?}",
+            wid, size
+        );
+        Ok(())
+    }
+
+    fn on_moved(
+        &mut self,
+        wid: WindowId,
+        position: PhysicalPosition<i32>,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'moved' event, window {:?}, position {:?}",
+            wid, position
+        );
         Ok(())
     }
 
