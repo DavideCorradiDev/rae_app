@@ -148,6 +148,27 @@ where
 
                 WindowEvent::CursorLeft { device_id } => eh.on_cursor_left(window_id, device_id)?,
 
+                WindowEvent::MouseInput {
+                    device_id,
+                    state,
+                    button,
+                    ..
+                } => match state {
+                    ElementState::Pressed => {
+                        eh.on_mouse_button_pressed(window_id, device_id, button)?
+                    }
+                    ElementState::Released => {
+                        eh.on_mouse_button_released(window_id, device_id, button)?
+                    }
+                },
+
+                WindowEvent::MouseWheel {
+                    device_id,
+                    delta,
+                    phase,
+                    ..
+                } => eh.on_scroll(window_id, device_id, delta, phase)?,
+
                 _ => (),
             },
 

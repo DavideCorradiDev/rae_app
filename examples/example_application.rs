@@ -1,7 +1,7 @@
 use rae_app::*;
 
 use application::Application;
-use event::{keyboard, DeviceId, EventHandler, EventLoop};
+use event::{keyboard, mouse, touch, DeviceId, EventHandler, EventLoop, ScrollDelta};
 use window::{PhysicalPosition, PhysicalSize, Size, Window, WindowBuilder, WindowId};
 
 #[derive(Debug)]
@@ -242,8 +242,48 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         modifiers_state: keyboard::ModifiersState,
     ) -> Result<(), Self::Error> {
         println!(
-            "Processed 'modifiers changed' device event, window {:?}, modifiers {:?}",
+            "Processed 'modifiers changed' event, window {:?}, modifiers {:?}",
             wid, modifiers_state
+        );
+        Ok(())
+    }
+
+    fn on_mouse_button_pressed(
+        &mut self,
+        wid: WindowId,
+        device_id: DeviceId,
+        button: mouse::Button,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'mouse button pressed' event, window {:?}, device {:?}, button {:?}",
+            wid, device_id, button
+        );
+        Ok(())
+    }
+
+    fn on_mouse_button_released(
+        &mut self,
+        wid: WindowId,
+        device_id: DeviceId,
+        button: mouse::Button,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'mouse button released' event, window {:?}, device {:?}, button {:?}",
+            wid, device_id, button
+        );
+        Ok(())
+    }
+
+    fn on_scroll(
+        &mut self,
+        wid: WindowId,
+        device_id: DeviceId,
+        delta: ScrollDelta,
+        phase: touch::TouchPhase,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'scroll' event, window {:?}, device {:?}, delta {:?}, phase {:?}",
+            wid, device_id, delta, phase
         );
         Ok(())
     }

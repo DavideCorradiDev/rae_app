@@ -1,4 +1,4 @@
-use super::{keyboard, DeviceId, EventLoop};
+use super::{event::ScrollDelta, keyboard, mouse, touch, DeviceId, EventLoop};
 use crate::window::{PhysicalPosition, PhysicalSize, WindowId};
 
 pub trait EventHandler<ErrorType, CustomEventType>
@@ -116,6 +116,34 @@ where
     }
 
     fn on_cursor_left(&mut self, _wid: WindowId, _device_id: DeviceId) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_mouse_button_pressed(
+        &mut self,
+        _wid: WindowId,
+        _device_id: DeviceId,
+        _button: mouse::Button,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_mouse_button_released(
+        &mut self,
+        _wid: WindowId,
+        _device_id: DeviceId,
+        _button: mouse::Button,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_scroll(
+        &mut self,
+        _wid: WindowId,
+        _device_id: DeviceId,
+        _delta: ScrollDelta,
+        _phase: touch::TouchPhase,
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
 
