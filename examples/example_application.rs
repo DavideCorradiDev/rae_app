@@ -88,9 +88,18 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_window_close_requested(&mut self, _: WindowId) -> Result<(), Self::Error> {
+    fn on_window_close_requested(&mut self, wid: WindowId) -> Result<(), Self::Error> {
         self.close_requested = true;
-        println!("Processed 'window close requested' event.");
+        println!(
+            "Processed 'window close requested' event, window {:?}.",
+            wid
+        );
+        Ok(())
+    }
+
+    fn on_window_destroyed(&mut self, wid: WindowId) -> Result<(), Self::Error> {
+        self.close_requested = true;
+        println!("Processed 'window destroyed' event, window {:?}.", wid);
         Ok(())
     }
 

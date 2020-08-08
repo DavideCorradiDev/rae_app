@@ -20,6 +20,10 @@ where
         Ok(())
     }
 
+    fn on_window_destroyed(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
     fn on_window_focus_gained(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
         Ok(())
     }
