@@ -210,6 +210,18 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         );
         Ok(())
     }
+
+    fn on_window_modifiers_changed(
+        &mut self,
+        wid: WindowId,
+        modifiers_state: keyboard::ModifiersState,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'modifiers changed' device event, window {:?}, modifiers {:?}",
+            wid, modifiers_state
+        );
+        Ok(())
+    }
 }
 
 fn main() {

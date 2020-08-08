@@ -98,6 +98,14 @@ where
         Ok(())
     }
 
+    fn on_window_modifiers_changed(
+        &mut self,
+        _wid: WindowId,
+        _modifiers_state: keyboard::ModifiersState,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
     fn on_fixed_update(&mut self, _dt: std::time::Duration) -> Result<(), Self::Error> {
         Ok(())
     }

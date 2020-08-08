@@ -134,6 +134,10 @@ where
                     self.handle_window_key_event(eh, window_id, device_id, &input, is_synthetic)?
                 }
 
+                WindowEvent::ModifiersChanged(mods) => {
+                    eh.on_window_modifiers_changed(window_id, mods)?
+                }
+
                 _ => (),
             },
 
