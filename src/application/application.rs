@@ -114,6 +114,9 @@ where
                 WindowEvent::Destroyed => eh.on_window_destroyed(window_id)?,
                 WindowEvent::Resized(size) => eh.on_window_resized(window_id, size)?,
                 WindowEvent::Moved(pos) => eh.on_window_moved(window_id, pos)?,
+                WindowEvent::ReceivedCharacter(c) => {
+                    eh.on_window_received_character(window_id, c)?
+                }
 
                 WindowEvent::Focused(focused) => {
                     if focused {

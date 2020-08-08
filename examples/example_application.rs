@@ -103,13 +103,21 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_window_focus_gained(&mut self, _: WindowId) -> Result<(), Self::Error> {
-        println!("Processed 'window focus gained' event");
+    fn on_window_focus_gained(&mut self, wid: WindowId) -> Result<(), Self::Error> {
+        println!("Processed 'window focus gained' event, window {:?}", wid);
         Ok(())
     }
 
-    fn on_window_focus_lost(&mut self, _: WindowId) -> Result<(), Self::Error> {
-        println!("Processed 'window focus lost' event");
+    fn on_window_focus_lost(&mut self, wid: WindowId) -> Result<(), Self::Error> {
+        println!("Processed 'window focus lost' event, window {:?}", wid);
+        Ok(())
+    }
+
+    fn on_window_received_character(&mut self, wid: WindowId, c: char) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'window received character' event, window {:?}, character {:?}",
+            wid, c
+        );
         Ok(())
     }
 

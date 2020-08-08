@@ -48,6 +48,14 @@ where
         Ok(())
     }
 
+    fn on_window_received_character(
+        &mut self,
+        _wid: WindowId,
+        _c: char,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
     fn on_window_key_pressed(
         &mut self,
         _wid: WindowId,
