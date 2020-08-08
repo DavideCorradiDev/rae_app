@@ -30,7 +30,17 @@ where
 
     fn on_key_pressed(
         &mut self,
-        _wid: Option<WindowId>,
+        _wid: WindowId,
+        _device_id: DeviceId,
+        _scan_code: keyboard::ScanCode,
+        _key_code: Option<keyboard::KeyCode>,
+        _is_repeat: bool,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_key_pressed(
+        &mut self,
         _device_id: DeviceId,
         _scan_code: keyboard::ScanCode,
         _key_code: Option<keyboard::KeyCode>,
@@ -41,7 +51,16 @@ where
 
     fn on_key_released(
         &mut self,
-        _wid: Option<WindowId>,
+        _wid: WindowId,
+        _device_id: DeviceId,
+        _scan_code: keyboard::ScanCode,
+        _key_code: Option<keyboard::KeyCode>,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_key_released(
+        &mut self,
         _device_id: DeviceId,
         _scan_code: keyboard::ScanCode,
         _key_code: Option<keyboard::KeyCode>,
