@@ -98,6 +98,27 @@ where
         Ok(())
     }
 
+    fn on_cursor_moved(
+        &mut self,
+        _wid: WindowId,
+        _device_id: DeviceId,
+        _position: PhysicalPosition<f64>,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_cursor_entered(
+        &mut self,
+        _wid: WindowId,
+        _device_id: DeviceId,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_cursor_left(&mut self, _wid: WindowId, _device_id: DeviceId) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
     fn on_fixed_update(&mut self, _dt: std::time::Duration) -> Result<(), Self::Error> {
         Ok(())
     }

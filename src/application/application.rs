@@ -111,9 +111,13 @@ where
         match event {
             Event::WindowEvent { window_id, event } => match event {
                 WindowEvent::CloseRequested => eh.on_close_requested(window_id)?,
+
                 WindowEvent::Destroyed => eh.on_destroyed(window_id)?,
+
                 WindowEvent::Resized(size) => eh.on_resized(window_id, size)?,
+
                 WindowEvent::Moved(pos) => eh.on_moved(window_id, pos)?,
+
                 WindowEvent::ReceivedCharacter(c) => eh.on_received_character(window_id, c)?,
 
                 WindowEvent::Focused(focused) => {
@@ -131,6 +135,18 @@ where
                 } => self.handle_key_event(eh, window_id, device_id, &input, is_synthetic)?,
 
                 WindowEvent::ModifiersChanged(mods) => eh.on_modifiers_changed(window_id, mods)?,
+
+                WindowEvent::CursorMoved {
+                    device_id,
+                    position,
+                    ..
+                } => eh.on_cursor_moved(window_id, device_id, position)?,
+
+                WindowEvent::CursorEntered { device_id } => {
+                    eh.on_cursor_entered(window_id, device_id)?
+                }
+
+                WindowEvent::CursorLeft { device_id } => eh.on_cursor_left(window_id, device_id)?,
 
                 _ => (),
             },

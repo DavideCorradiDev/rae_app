@@ -186,7 +186,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         is_synthetic: bool,
     ) -> Result<(), Self::Error> {
         println!(
-            "Processed 'window key released' device event, \
+            "Processed 'window key released' event, \
             window: {:?}, device: {:?}, scan code: {:?}, key code: {:?}, synthetic {:?}",
             wid, device_id, scan_code, key_code, is_synthetic
         );
@@ -200,9 +200,38 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         key_code: Option<keyboard::KeyCode>,
     ) -> Result<(), Self::Error> {
         println!(
-            "Processed 'device key released' device event, \
+            "Processed 'device key released' event, \
             device: {:?}, scan code: {:?}, key code: {:?}",
             device_id, scan_code, key_code,
+        );
+        Ok(())
+    }
+
+    fn on_cursor_moved(
+        &mut self,
+        wid: WindowId,
+        device_id: DeviceId,
+        position: PhysicalPosition<f64>,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'cursor moved' event, window: {:?}, device: {:?}, position: {:?}",
+            wid, device_id, position
+        );
+        Ok(())
+    }
+
+    fn on_cursor_entered(&mut self, wid: WindowId, device_id: DeviceId) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'cursor entered' event, window: {:?}, device: {:?}",
+            wid, device_id
+        );
+        Ok(())
+    }
+
+    fn on_cursor_left(&mut self, wid: WindowId, device_id: DeviceId) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'cursor left' event, window: {:?}, device: {:?}",
+            wid, device_id
         );
         Ok(())
     }
