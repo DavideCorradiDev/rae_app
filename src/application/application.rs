@@ -209,7 +209,7 @@ where
                     device_id,
                     axis,
                     value,
-                } => eh.on_axis_motion(window_id, device_id, axis, value)?,
+                } => eh.on_axis_moved(window_id, device_id, axis, value)?,
 
                 _ => (),
             },
@@ -226,7 +226,7 @@ where
                 DeviceEvent::MouseWheel { delta } => eh.on_device_scroll(device_id, delta)?,
 
                 DeviceEvent::Motion { axis, value } => {
-                    eh.on_device_axis_motion(device_id, axis, value)?
+                    eh.on_device_axis_moved(device_id, axis, value)?
                 }
 
                 DeviceEvent::Button { button, state } => match state {

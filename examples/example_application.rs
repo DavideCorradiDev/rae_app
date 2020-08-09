@@ -61,7 +61,7 @@ struct ApplicationImpl {
     processed_variable_frames: u64,
     processed_cursor_moved_events: u64,
     processed_device_cursor_moved_events: u64,
-    processed_device_axis_motion_events: u64,
+    processed_device_axis_moved_events: u64,
     processed_new_events_events: u64,
     processed_main_events_cleared_events: u64,
     processed_redraw_events_cleared_events: u64,
@@ -87,7 +87,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
             processed_variable_frames: 0,
             processed_cursor_moved_events: 0,
             processed_device_cursor_moved_events: 0,
-            processed_device_axis_motion_events: 0,
+            processed_device_axis_moved_events: 0,
             processed_new_events_events: 0,
             processed_main_events_cleared_events: 0,
             processed_redraw_events_cleared_events: 0,
@@ -342,7 +342,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_axis_motion(
+    fn on_axis_moved(
         &mut self,
         wid: WindowId,
         device_id: DeviceId,
@@ -410,19 +410,19 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_device_axis_motion(
+    fn on_device_axis_moved(
         &mut self,
         device_id: DeviceId,
         axis: controller::AxisId,
         value: f64,
     ) -> Result<(), Self::Error> {
-        if self.processed_device_axis_motion_events % 20 == 0 {
+        if self.processed_device_axis_moved_events % 20 == 0 {
             println!(
                 "Processed 'device axis motion' event, device {:?}, axis {:?}, value {:?}",
                 device_id, axis, value
             );
         }
-        self.processed_device_axis_motion_events = self.processed_device_axis_motion_events + 1;
+        self.processed_device_axis_moved_events = self.processed_device_axis_moved_events + 1;
         Ok(())
     }
 

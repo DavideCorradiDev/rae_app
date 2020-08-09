@@ -173,7 +173,7 @@ where
         Ok(())
     }
 
-    fn on_axis_motion(
+    fn on_axis_moved(
         &mut self,
         _wid: WindowId,
         _device_id: DeviceId,
@@ -207,7 +207,7 @@ where
         Ok(())
     }
 
-    fn on_device_axis_motion(
+    fn on_device_axis_moved(
         &mut self,
         _device_id: DeviceId,
         _axis: controller::AxisId,
