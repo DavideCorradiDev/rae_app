@@ -1,9 +1,11 @@
+extern crate winit;
+
 use std::collections::BTreeMap;
 
 use crate::{
     event::{
-        keyboard::ScanCode, ApplicationFlow, ControlFlow, DeviceEvent, DeviceId, ElementState,
-        Event, EventHandler, EventLoop, WindowEvent,
+        keyboard::ScanCode, ControlFlow, DeviceEvent, DeviceId, ElementState, Event, EventHandler,
+        EventLoop, WindowEvent,
     },
     window::{PhysicalPosition, WindowId},
 };
@@ -77,8 +79,8 @@ where
                 .handle_event(&mut event_handler, event)
                 .expect("The application shut down due to an error")
             {
-                ApplicationFlow::Continue => *control_flow = ControlFlow::Poll,
-                ApplicationFlow::Exit => *control_flow = ControlFlow::Exit,
+                ControlFlow::Continue => *control_flow = winit::event_loop::ControlFlow::Poll,
+                ControlFlow::Exit => *control_flow = winit::event_loop::ControlFlow::Exit,
             }
         });
     }
@@ -87,7 +89,7 @@ where
         &mut self,
         eh: &mut EventHandlerType,
         event: Event<EventHandlerType::CustomEvent>,
-    ) -> Result<ApplicationFlow, EventHandlerType::Error> {
+    ) -> Result<ControlFlow, EventHandlerType::Error> {
         match event {
             Event::NewEvents(start_cause) => eh.on_new_events(start_cause),
 
@@ -215,10 +217,10 @@ where
                 } => eh.on_axis_moved(window_id, device_id, axis, value),
 
                 // Not universally supported.
-                WindowEvent::TouchpadPressure { .. } => Ok(ApplicationFlow::Continue),
+                WindowEvent::TouchpadPressure { .. } => Ok(ControlFlow::Continue),
 
                 // Not universally supported.
-                WindowEvent::ThemeChanged(_) => Ok(ApplicationFlow::Continue),
+                WindowEvent::ThemeChanged(_) => Ok(ControlFlow::Continue),
             },
 
             Event::DeviceEvent { device_id, event } => match event {
@@ -270,13 +272,13 @@ where
     fn update(
         &mut self,
         eh: &mut EventHandlerType,
-    ) -> Result<ApplicationFlow, EventHandlerType::Error> {
+    ) -> Result<ControlFlow, EventHandlerType::Error> {
         let current_time = std::time::Instant::now();
 
         while current_time - self.last_fixed_update_time >= self.fixed_update_period {
             match eh.on_fixed_update(self.fixed_update_period) {
                 Ok(v) => match v {
-                    ApplicationFlow::Exit => return Ok(ApplicationFlow::Exit),
+                    ControlFlow::Exit => return Ok(ControlFlow::Exit),
                     _ => (),
                 },
                 Err(e) => return Err(e),
@@ -288,7 +290,7 @@ where
         if time_since_last_variable_update > self.variable_update_min_period {
             match eh.on_variable_update(time_since_last_variable_update) {
                 Ok(v) => match v {
-                    ApplicationFlow::Exit => return Ok(ApplicationFlow::Exit),
+                    ControlFlow::Exit => return Ok(ControlFlow::Exit),
                     _ => (),
                 },
                 Err(e) => return Err(e),
