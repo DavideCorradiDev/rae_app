@@ -2,14 +2,15 @@ use rae_app::*;
 
 use application::Application;
 use event::{
-    controller, keyboard, mouse, touch, DeviceId, EventHandler, EventLoop, EventLoopStartCause,
-    ScrollDelta,
+    controller, keyboard, mouse, touch, DeviceId, EventHandler, EventLoop, EventLoopClosed,
+    EventLoopProxy, EventLoopStartCause, ScrollDelta,
 };
 use window::{PhysicalPosition, PhysicalSize, Size, Window, WindowBuilder, WindowId};
 
 #[derive(Debug)]
 enum ApplicationError {
     WindowCreationError(window::OsError),
+    CustomEventSendingError(EventLoopClosed<CustomEvent>),
 }
 
 impl std::fmt::Display for ApplicationError {
@@ -17,6 +18,9 @@ impl std::fmt::Display for ApplicationError {
         match self {
             ApplicationError::WindowCreationError(e) => {
                 write!(f, "Failed to create window ({})", e)
+            }
+            ApplicationError::CustomEventSendingError(e) => {
+                write!(f, "Failed to send a custom event ({})", e)
             }
         }
     }
@@ -26,6 +30,7 @@ impl std::error::Error for ApplicationError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             ApplicationError::WindowCreationError(e) => Some(e),
+            ApplicationError::CustomEventSendingError(e) => Some(e),
         }
     }
 }
@@ -36,10 +41,21 @@ impl From<window::OsError> for ApplicationError {
     }
 }
 
-struct CustomEvent {}
+impl From<EventLoopClosed<CustomEvent>> for ApplicationError {
+    fn from(e: EventLoopClosed<CustomEvent>) -> Self {
+        ApplicationError::CustomEventSendingError(e)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum CustomEvent {
+    SomeTimePassed,
+    LongTimePassed,
+}
 
 struct ApplicationImpl {
     _window: Window,
+    event_loop_proxy: EventLoopProxy<CustomEvent>,
     close_requested: bool,
     processed_fixed_frames: u64,
     processed_variable_frames: u64,
@@ -63,6 +79,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
             .build(event_loop)?;
         Ok(Self {
             _window: window,
+            event_loop_proxy: event_loop.create_proxy(),
             close_requested: false,
             processed_fixed_frames: 0,
             processed_variable_frames: 0,
@@ -84,6 +101,17 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
                 self.processed_fixed_frames, dt
             );
         }
+
+        if self.processed_fixed_frames % 30 == 0 {
+            self.event_loop_proxy
+                .send_event(CustomEvent::SomeTimePassed)?;
+        }
+
+        if self.processed_fixed_frames % 90 == 0 {
+            self.event_loop_proxy
+                .send_event(CustomEvent::LongTimePassed)?;
+        }
+
         self.processed_fixed_frames = self.processed_fixed_frames + 1;
         Ok(())
     }
@@ -372,8 +400,8 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_custom_event(&mut self, _event: Self::CustomEvent) -> Result<(), Self::Error> {
-        println!("Processed 'custom' event");
+    fn on_custom_event(&mut self, event: Self::CustomEvent) -> Result<(), Self::Error> {
+        println!("Processed 'custom' event, {:?}", event);
         Ok(())
     }
 
