@@ -5,6 +5,7 @@ use super::{
 };
 use crate::window::{PhysicalPosition, PhysicalSize, WindowId};
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ApplicationFlow {
     Continue,
     Exit,
