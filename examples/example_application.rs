@@ -238,23 +238,6 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
-    fn on_device_key_pressed(
-        &mut self,
-        device_id: DeviceId,
-        scan_code: keyboard::ScanCode,
-        key_code: Option<keyboard::KeyCode>,
-        is_repeat: bool,
-    ) -> Result<(), Self::Error> {
-        if !is_repeat {
-            println!(
-                "Processed 'device key pressed' event, \
-                device: {:?}, scan code: {:?}, key code: {:?}, repeat {:?}",
-                device_id, scan_code, key_code, is_repeat
-            );
-        }
-        Ok(())
-    }
-
     fn on_key_released(
         &mut self,
         wid: WindowId,
@@ -267,20 +250,6 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
             "Processed 'window key released' event, \
             window: {:?}, device: {:?}, scan code: {:?}, key code: {:?}, synthetic {:?}",
             wid, device_id, scan_code, key_code, is_synthetic
-        );
-        Ok(())
-    }
-
-    fn on_device_key_released(
-        &mut self,
-        device_id: DeviceId,
-        scan_code: keyboard::ScanCode,
-        key_code: Option<keyboard::KeyCode>,
-    ) -> Result<(), Self::Error> {
-        println!(
-            "Processed 'device key released' event, \
-            device: {:?}, scan code: {:?}, key code: {:?}",
-            device_id, scan_code, key_code,
         );
         Ok(())
     }
@@ -396,6 +365,115 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
             "Processed 'on touch' event, \
             window {:?}, device {:?}, phase {:?}, location {:?}, force {:?}, id {:?}",
             wid, device_id, phase, location, force, id
+        );
+        Ok(())
+    }
+
+    fn on_device_added(&mut self, device_id: DeviceId) -> Result<(), Self::Error> {
+        println!("Processed 'device added' event, device {:?}", device_id);
+        Ok(())
+    }
+
+    fn on_device_removed(&mut self, device_id: DeviceId) -> Result<(), Self::Error> {
+        println!("Processed 'device removed' event, device {:?}", device_id);
+        Ok(())
+    }
+
+    fn on_device_cursor_moved(
+        &mut self,
+        device_id: DeviceId,
+        position_delta: PhysicalPosition<f64>,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'device cursor moved' event, device {:?}, position delta {:?}",
+            device_id, position_delta
+        );
+        Ok(())
+    }
+
+    fn on_device_scroll(
+        &mut self,
+        device_id: DeviceId,
+        scroll_delta: ScrollDelta,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'device cursor moved' event, device {:?}, scroll delta {:?}",
+            device_id, scroll_delta
+        );
+        Ok(())
+    }
+
+    fn on_device_axis_motion(
+        &mut self,
+        device_id: DeviceId,
+        axis: controller::AxisId,
+        value: f64,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'device axis motion' event, device {:?}, axis {:?}, value {:?}",
+            device_id, axis, value
+        );
+        Ok(())
+    }
+
+    fn on_device_button_pressed(
+        &mut self,
+        device_id: DeviceId,
+        button: controller::ButtonId,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'device button pressed' event, device {:?}, button {:?}",
+            device_id, button
+        );
+        Ok(())
+    }
+
+    fn on_device_button_released(
+        &mut self,
+        device_id: DeviceId,
+        button: controller::ButtonId,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'device button released' event, device {:?}, button {:?}",
+            device_id, button
+        );
+        Ok(())
+    }
+
+    fn on_device_key_pressed(
+        &mut self,
+        device_id: DeviceId,
+        scan_code: keyboard::ScanCode,
+        key_code: Option<keyboard::KeyCode>,
+        is_repeat: bool,
+    ) -> Result<(), Self::Error> {
+        if !is_repeat {
+            println!(
+                "Processed 'device key pressed' event,
+                device: {:?}, scan code: {:?}, key code: {:?}, repeat {:?}",
+                device_id, scan_code, key_code, is_repeat
+            );
+        }
+        Ok(())
+    }
+
+    fn on_device_key_released(
+        &mut self,
+        device_id: DeviceId,
+        scan_code: keyboard::ScanCode,
+        key_code: Option<keyboard::KeyCode>,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'device key released' event, device: {:?}, scan code: {:?}, key code: {:?}",
+            device_id, scan_code, key_code,
+        );
+        Ok(())
+    }
+
+    fn on_device_text(&mut self, device_id: DeviceId, codepoint: char) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'device text' event, device: {:?}, codepoint: {:?}",
+            device_id, codepoint
         );
         Ok(())
     }

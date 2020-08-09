@@ -93,16 +93,6 @@ where
         Ok(())
     }
 
-    fn on_device_key_pressed(
-        &mut self,
-        _device_id: DeviceId,
-        _scan_code: keyboard::ScanCode,
-        _key_code: Option<keyboard::KeyCode>,
-        _is_repeat: bool,
-    ) -> Result<(), Self::Error> {
-        Ok(())
-    }
-
     fn on_key_released(
         &mut self,
         _wid: WindowId,
@@ -110,15 +100,6 @@ where
         _scan_code: keyboard::ScanCode,
         _key_code: Option<keyboard::KeyCode>,
         _is_synthetic: bool,
-    ) -> Result<(), Self::Error> {
-        Ok(())
-    }
-
-    fn on_device_key_released(
-        &mut self,
-        _device_id: DeviceId,
-        _scan_code: keyboard::ScanCode,
-        _key_code: Option<keyboard::KeyCode>,
     ) -> Result<(), Self::Error> {
         Ok(())
     }
@@ -198,6 +179,82 @@ where
         _device_id: DeviceId,
         _axis: controller::AxisId,
         _value: f64,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_added(&mut self, _device_id: DeviceId) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_removed(&mut self, _device_id: DeviceId) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_cursor_moved(
+        &mut self,
+        _device_id: DeviceId,
+        _position_delta: PhysicalPosition<f64>,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_scroll(
+        &mut self,
+        _device_id: DeviceId,
+        _scroll_delta: ScrollDelta,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_axis_motion(
+        &mut self,
+        _device_id: DeviceId,
+        _axis: controller::AxisId,
+        _value: f64,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_button_pressed(
+        &mut self,
+        _device_id: DeviceId,
+        _button: controller::ButtonId,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_button_released(
+        &mut self,
+        _device_id: DeviceId,
+        _button: controller::ButtonId,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_key_pressed(
+        &mut self,
+        _device_id: DeviceId,
+        _scan_code: keyboard::ScanCode,
+        _key_code: Option<keyboard::KeyCode>,
+        _is_repeat: bool,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_key_released(
+        &mut self,
+        _device_id: DeviceId,
+        _scan_code: keyboard::ScanCode,
+        _key_code: Option<keyboard::KeyCode>,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_device_text(
+        &mut self,
+        _device_id: DeviceId,
+        _codepoint: char,
     ) -> Result<(), Self::Error> {
         Ok(())
     }

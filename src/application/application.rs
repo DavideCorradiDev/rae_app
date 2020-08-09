@@ -5,7 +5,7 @@ use crate::{
         keyboard::ScanCode, ControlFlow, DeviceEvent, DeviceId, ElementState, Event, EventHandler,
         EventLoop, KeyboardInput, WindowEvent,
     },
-    window::WindowId,
+    window::{PhysicalPosition, WindowId},
 };
 
 pub struct Application<EventHandlerType, Error, CustomEvent>
@@ -215,9 +215,28 @@ where
             },
 
             Event::DeviceEvent { device_id, event } => match event {
+                DeviceEvent::Added => eh.on_device_added(device_id)?,
+
+                DeviceEvent::Removed => eh.on_device_removed(device_id)?,
+
+                DeviceEvent::MouseMotion { delta } => {
+                    eh.on_device_cursor_moved(device_id, PhysicalPosition::new(delta.0, delta.1))?
+                }
+
+                DeviceEvent::MouseWheel { delta } => eh.on_device_scroll(device_id, delta)?,
+
+                DeviceEvent::Motion { axis, value } => {
+                    eh.on_device_axis_motion(device_id, axis, value)?
+                }
+
+                DeviceEvent::Button { button, state } => match state {
+                    ElementState::Pressed => eh.on_device_button_pressed(device_id, button)?,
+                    ElementState::Released => eh.on_device_button_released(device_id, button)?,
+                },
+
                 DeviceEvent::Key(input) => self.handle_device_key_event(eh, device_id, &input)?,
 
-                _ => (),
+                DeviceEvent::Text { codepoint } => eh.on_device_text(device_id, codepoint)?,
             },
         }
         Ok(())
