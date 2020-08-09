@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 
 use crate::{
     event::{
-        keyboard::ScanCode, ControlFlow, DeviceEvent, DeviceId, ElementState, Event, EventHandler,
-        EventLoop, WindowEvent,
+        keyboard::ScanCode, ApplicationFlow, ControlFlow, DeviceEvent, DeviceId, ElementState,
+        Event, EventHandler, EventLoop, WindowEvent,
     },
     window::{PhysicalPosition, WindowId},
 };
@@ -72,10 +72,12 @@ where
         self.last_variable_update_time = current_time;
 
         event_loop.run(move |event, _, control_flow| {
-            self.handle_event(&mut event_handler, event)
-                .expect("The application shut down due to an error");
-            if event_handler.is_close_requested() {
-                *control_flow = ControlFlow::Exit;
+            match self
+                .handle_event(&mut event_handler, event)
+                .expect("The application shut down due to an error")
+            {
+                ApplicationFlow::Continue => *control_flow = ControlFlow::Poll,
+                ApplicationFlow::Exit => *control_flow = ControlFlow::Exit,
             }
         });
     }
@@ -84,56 +86,53 @@ where
         &mut self,
         eh: &mut EventHandlerType,
         event: Event<EventHandlerType::CustomEvent>,
-    ) -> Result<(), EventHandlerType::Error> {
+    ) -> Result<ApplicationFlow, EventHandlerType::Error> {
         match event {
-            Event::NewEvents(start_cause) => eh.on_new_events(start_cause)?,
+            Event::NewEvents(start_cause) => eh.on_new_events(start_cause),
 
-            Event::UserEvent(event) => eh.on_custom_event(event)?,
+            Event::UserEvent(event) => eh.on_custom_event(event),
 
-            Event::Suspended => eh.on_suspended()?,
+            Event::Suspended => eh.on_suspended(),
 
-            Event::Resumed => eh.on_resumed()?,
+            Event::Resumed => eh.on_resumed(),
 
-            Event::MainEventsCleared => {
-                self.update(eh)?;
-                eh.on_main_events_cleared()?;
-            }
+            Event::MainEventsCleared => self.update(eh),
 
-            Event::RedrawRequested(window_id) => eh.on_redraw_requested(window_id)?,
+            Event::RedrawRequested(window_id) => eh.on_redraw_requested(window_id),
 
-            Event::RedrawEventsCleared => eh.on_redraw_events_cleared()?,
+            Event::RedrawEventsCleared => eh.on_redraw_events_cleared(),
 
-            Event::LoopDestroyed => eh.on_event_loop_destroyed()?,
+            Event::LoopDestroyed => eh.on_event_loop_destroyed(),
 
             Event::WindowEvent { window_id, event } => match event {
-                WindowEvent::CloseRequested => eh.on_close_requested(window_id)?,
+                WindowEvent::CloseRequested => eh.on_close_requested(window_id),
 
-                WindowEvent::Destroyed => eh.on_destroyed(window_id)?,
+                WindowEvent::Destroyed => eh.on_destroyed(window_id),
 
                 WindowEvent::Focused(focused) => {
                     if focused {
-                        eh.on_focus_gained(window_id)?;
+                        eh.on_focus_gained(window_id)
                     } else {
-                        eh.on_focus_lost(window_id)?;
+                        eh.on_focus_lost(window_id)
                     }
                 }
 
-                WindowEvent::Resized(size) => eh.on_resized(window_id, size)?,
+                WindowEvent::Resized(size) => eh.on_resized(window_id, size),
 
                 WindowEvent::ScaleFactorChanged {
                     scale_factor,
                     new_inner_size,
-                } => eh.on_scale_factor_changed(window_id, scale_factor, new_inner_size)?,
+                } => eh.on_scale_factor_changed(window_id, scale_factor, new_inner_size),
 
-                WindowEvent::Moved(pos) => eh.on_moved(window_id, pos)?,
+                WindowEvent::Moved(pos) => eh.on_moved(window_id, pos),
 
-                WindowEvent::ReceivedCharacter(c) => eh.on_received_character(window_id, c)?,
+                WindowEvent::ReceivedCharacter(c) => eh.on_received_character(window_id, c),
 
-                WindowEvent::DroppedFile(path) => eh.on_hovered_file_dropped(window_id, path)?,
+                WindowEvent::DroppedFile(path) => eh.on_hovered_file_dropped(window_id, path),
 
-                WindowEvent::HoveredFile(path) => eh.on_hovered_file_entered(window_id, path)?,
+                WindowEvent::HoveredFile(path) => eh.on_hovered_file_entered(window_id, path),
 
-                WindowEvent::HoveredFileCancelled => eh.on_hovered_file_left(window_id)?,
+                WindowEvent::HoveredFileCancelled => eh.on_hovered_file_left(window_id),
 
                 WindowEvent::KeyboardInput {
                     device_id,
@@ -153,30 +152,30 @@ where
                             input.virtual_keycode,
                             is_synthetic,
                             is_repeat,
-                        )?,
+                        ),
                         ElementState::Released => eh.on_key_released(
                             window_id,
                             device_id,
                             input.scancode,
                             input.virtual_keycode,
                             is_synthetic,
-                        )?,
+                        ),
                     }
                 }
 
-                WindowEvent::ModifiersChanged(mods) => eh.on_modifiers_changed(window_id, mods)?,
+                WindowEvent::ModifiersChanged(mods) => eh.on_modifiers_changed(window_id, mods),
 
                 WindowEvent::CursorMoved {
                     device_id,
                     position,
                     ..
-                } => eh.on_cursor_moved(window_id, device_id, position)?,
+                } => eh.on_cursor_moved(window_id, device_id, position),
 
                 WindowEvent::CursorEntered { device_id } => {
-                    eh.on_cursor_entered(window_id, device_id)?
+                    eh.on_cursor_entered(window_id, device_id)
                 }
 
-                WindowEvent::CursorLeft { device_id } => eh.on_cursor_left(window_id, device_id)?,
+                WindowEvent::CursorLeft { device_id } => eh.on_cursor_left(window_id, device_id),
 
                 WindowEvent::MouseInput {
                     device_id,
@@ -185,10 +184,10 @@ where
                     ..
                 } => match state {
                     ElementState::Pressed => {
-                        eh.on_mouse_button_pressed(window_id, device_id, button)?
+                        eh.on_mouse_button_pressed(window_id, device_id, button)
                     }
                     ElementState::Released => {
-                        eh.on_mouse_button_released(window_id, device_id, button)?
+                        eh.on_mouse_button_released(window_id, device_id, button)
                     }
                 },
 
@@ -197,7 +196,7 @@ where
                     delta,
                     phase,
                     ..
-                } => eh.on_scroll(window_id, device_id, delta, phase)?,
+                } => eh.on_scroll(window_id, device_id, delta, phase),
 
                 WindowEvent::Touch(touch) => eh.on_touch(
                     window_id,
@@ -206,39 +205,39 @@ where
                     touch.location,
                     touch.force,
                     touch.id,
-                )?,
+                ),
 
                 WindowEvent::AxisMotion {
                     device_id,
                     axis,
                     value,
-                } => eh.on_axis_moved(window_id, device_id, axis, value)?,
+                } => eh.on_axis_moved(window_id, device_id, axis, value),
 
                 // Not universally supported.
-                WindowEvent::TouchpadPressure { .. } => (),
+                WindowEvent::TouchpadPressure { .. } => Ok(ApplicationFlow::Continue),
 
                 // Not universally supported.
-                WindowEvent::ThemeChanged(_) => (),
+                WindowEvent::ThemeChanged(_) => Ok(ApplicationFlow::Continue),
             },
 
             Event::DeviceEvent { device_id, event } => match event {
-                DeviceEvent::Added => eh.on_device_added(device_id)?,
+                DeviceEvent::Added => eh.on_device_added(device_id),
 
-                DeviceEvent::Removed => eh.on_device_removed(device_id)?,
+                DeviceEvent::Removed => eh.on_device_removed(device_id),
 
                 DeviceEvent::MouseMotion { delta } => {
-                    eh.on_device_cursor_moved(device_id, PhysicalPosition::new(delta.0, delta.1))?
+                    eh.on_device_cursor_moved(device_id, PhysicalPosition::new(delta.0, delta.1))
                 }
 
-                DeviceEvent::MouseWheel { delta } => eh.on_device_scroll(device_id, delta)?,
+                DeviceEvent::MouseWheel { delta } => eh.on_device_scroll(device_id, delta),
 
                 DeviceEvent::Motion { axis, value } => {
-                    eh.on_device_axis_moved(device_id, axis, value)?
+                    eh.on_device_axis_moved(device_id, axis, value)
                 }
 
                 DeviceEvent::Button { button, state } => match state {
-                    ElementState::Pressed => eh.on_device_button_pressed(device_id, button)?,
-                    ElementState::Released => eh.on_device_button_released(device_id, button)?,
+                    ElementState::Pressed => eh.on_device_button_pressed(device_id, button),
+                    ElementState::Released => eh.on_device_button_released(device_id, button),
                 },
 
                 DeviceEvent::Key(input) => {
@@ -253,36 +252,50 @@ where
                             input.scancode,
                             input.virtual_keycode,
                             is_repeat,
-                        )?,
+                        ),
                         ElementState::Released => eh.on_device_key_released(
                             device_id,
                             input.scancode,
                             input.virtual_keycode,
-                        )?,
+                        ),
                     }
                 }
 
-                DeviceEvent::Text { codepoint } => eh.on_device_text(device_id, codepoint)?,
+                DeviceEvent::Text { codepoint } => eh.on_device_text(device_id, codepoint),
             },
         }
-        Ok(())
     }
 
-    fn update(&mut self, eh: &mut EventHandlerType) -> Result<(), EventHandlerType::Error> {
+    fn update(
+        &mut self,
+        eh: &mut EventHandlerType,
+    ) -> Result<ApplicationFlow, EventHandlerType::Error> {
         let current_time = std::time::Instant::now();
 
         while current_time - self.last_fixed_update_time >= self.fixed_update_period {
-            eh.on_fixed_update(self.fixed_update_period)?;
+            match eh.on_fixed_update(self.fixed_update_period) {
+                Ok(v) => match v {
+                    ApplicationFlow::Exit => return Ok(ApplicationFlow::Exit),
+                    _ => (),
+                },
+                Err(e) => return Err(e),
+            };
             self.last_fixed_update_time += self.fixed_update_period;
         }
 
         let time_since_last_variable_update = current_time - self.last_variable_update_time;
         if time_since_last_variable_update > self.variable_update_min_period {
-            eh.on_variable_update(time_since_last_variable_update)?;
+            match eh.on_variable_update(time_since_last_variable_update) {
+                Ok(v) => match v {
+                    ApplicationFlow::Exit => return Ok(ApplicationFlow::Exit),
+                    _ => (),
+                },
+                Err(e) => return Err(e),
+            }
             self.last_variable_update_time = current_time;
         }
 
-        Ok(())
+        eh.on_main_events_cleared()
     }
 }
 
@@ -349,10 +362,6 @@ mod tests {
 
         fn new(_: &EventLoop<()>) -> Result<Self, MyError> {
             Ok(Self {})
-        }
-
-        fn is_close_requested(&self) -> bool {
-            true
         }
     }
 
