@@ -1,4 +1,12 @@
-use crate::event::{ControlFlow, ElementState, Event, EventHandler, EventLoop, WindowEvent};
+use std::collections::BTreeMap;
+
+use crate::{
+    event::{
+        keyboard::ScanCode, ControlFlow, DeviceEvent, DeviceId, ElementState, Event, EventHandler,
+        EventLoop, WindowEvent,
+    },
+    window::{PhysicalPosition, WindowId},
+};
 
 pub struct Application<EventHandlerType, Error, CustomEvent>
 where
@@ -6,7 +14,7 @@ where
     Error: std::fmt::Display + std::error::Error + 'static,
     CustomEvent: 'static,
 {
-    keyboard_state: [ElementState; 128],
+    keyboard_state: KeyboardState,
     fixed_update_period: std::time::Duration,
     variable_update_min_period: std::time::Duration,
     last_fixed_update_time: std::time::Instant,
@@ -43,7 +51,7 @@ where
         let current_time = std::time::Instant::now();
 
         Self {
-            keyboard_state: [ElementState::Released; 128],
+            keyboard_state: KeyboardState::new(),
             fixed_update_period,
             variable_update_min_period,
             last_fixed_update_time: current_time,
@@ -74,21 +82,21 @@ where
 
     fn run_frame(
         &mut self,
-        event_handler: &mut EventHandlerType,
+        eh: &mut EventHandlerType,
         event: Event<EventHandlerType::CustomEvent>,
     ) -> Result<(), EventHandlerType::Error> {
-        self.handle_event(event, event_handler)?;
+        self.handle_event(event, eh)?;
 
         let current_time = std::time::Instant::now();
 
         while current_time - self.last_fixed_update_time >= self.fixed_update_period {
-            event_handler.on_fixed_update(self.fixed_update_period)?;
+            eh.on_fixed_update(self.fixed_update_period)?;
             self.last_fixed_update_time += self.fixed_update_period;
         }
 
         let time_since_last_variable_update = current_time - self.last_variable_update_time;
         if time_since_last_variable_update > self.variable_update_min_period {
-            event_handler.on_variable_update(time_since_last_variable_update)?;
+            eh.on_variable_update(time_since_last_variable_update)?;
             self.last_variable_update_time = current_time;
         }
 
@@ -98,58 +106,221 @@ where
     fn handle_event(
         &mut self,
         event: Event<EventHandlerType::CustomEvent>,
-        event_handler: &mut EventHandlerType,
+        eh: &mut EventHandlerType,
     ) -> Result<(), EventHandlerType::Error> {
         match event {
+            Event::NewEvents(start_cause) => eh.on_new_events(start_cause)?,
+
+            Event::UserEvent(event) => eh.on_custom_event(event)?,
+
+            Event::Suspended => eh.on_suspended()?,
+
+            Event::Resumed => eh.on_resumed()?,
+
+            Event::MainEventsCleared => eh.on_main_events_cleared()?,
+
+            Event::RedrawRequested(window_id) => eh.on_redraw_requested(window_id)?,
+
+            Event::RedrawEventsCleared => eh.on_redraw_events_cleared()?,
+
+            Event::LoopDestroyed => eh.on_event_loop_destroyed()?,
+
             Event::WindowEvent { window_id, event } => match event {
-                WindowEvent::CloseRequested => {
-                    event_handler.on_close_requested(window_id)?;
-                }
+                WindowEvent::CloseRequested => eh.on_close_requested(window_id)?,
+
+                WindowEvent::Destroyed => eh.on_destroyed(window_id)?,
 
                 WindowEvent::Focused(focused) => {
                     if focused {
-                        event_handler.on_focus_gained(window_id)?;
+                        eh.on_focus_gained(window_id)?;
                     } else {
-                        event_handler.on_focus_lost(window_id)?;
+                        eh.on_focus_lost(window_id)?;
                     }
                 }
+
+                WindowEvent::Resized(size) => eh.on_resized(window_id, size)?,
+
+                WindowEvent::ScaleFactorChanged {
+                    scale_factor,
+                    new_inner_size,
+                } => eh.on_scale_factor_changed(window_id, scale_factor, new_inner_size)?,
+
+                WindowEvent::Moved(pos) => eh.on_moved(window_id, pos)?,
+
+                WindowEvent::ReceivedCharacter(c) => eh.on_received_character(window_id, c)?,
+
+                WindowEvent::DroppedFile(path) => eh.on_hovered_file_dropped(window_id, path)?,
+
+                WindowEvent::HoveredFile(path) => eh.on_hovered_file_entered(window_id, path)?,
+
+                WindowEvent::HoveredFileCancelled => eh.on_hovered_file_left(window_id)?,
 
                 WindowEvent::KeyboardInput {
-                    device_id, input, ..
+                    device_id,
+                    input,
+                    is_synthetic,
                 } => {
-                    // The implementation should cover all possible scan codes.
-                    assert!(
-                        (input.scancode as usize) < self.keyboard_state.len(),
-                        "Invalid scan code {}",
-                        input.scancode
-                    );
-                    let current_key_state = &mut self.keyboard_state[input.scancode as usize];
-                    let is_repeat = *current_key_state == input.state;
-                    *current_key_state = input.state;
+                    let last_key_state =
+                        self.keyboard_state
+                            .key_state(Some(window_id), device_id, input.scancode);
+                    let is_repeat = *last_key_state == input.state;
+                    *last_key_state = input.state;
                     match input.state {
-                        ElementState::Pressed => event_handler.on_key_pressed(
+                        ElementState::Pressed => eh.on_key_pressed(
                             window_id,
                             device_id,
                             input.scancode,
                             input.virtual_keycode,
+                            is_synthetic,
                             is_repeat,
                         )?,
-                        ElementState::Released => event_handler.on_key_released(
+                        ElementState::Released => eh.on_key_released(
                             window_id,
                             device_id,
                             input.scancode,
                             input.virtual_keycode,
-                            is_repeat,
+                            is_synthetic,
                         )?,
                     }
                 }
 
-                _ => (),
+                WindowEvent::ModifiersChanged(mods) => eh.on_modifiers_changed(window_id, mods)?,
+
+                WindowEvent::CursorMoved {
+                    device_id,
+                    position,
+                    ..
+                } => eh.on_cursor_moved(window_id, device_id, position)?,
+
+                WindowEvent::CursorEntered { device_id } => {
+                    eh.on_cursor_entered(window_id, device_id)?
+                }
+
+                WindowEvent::CursorLeft { device_id } => eh.on_cursor_left(window_id, device_id)?,
+
+                WindowEvent::MouseInput {
+                    device_id,
+                    state,
+                    button,
+                    ..
+                } => match state {
+                    ElementState::Pressed => {
+                        eh.on_mouse_button_pressed(window_id, device_id, button)?
+                    }
+                    ElementState::Released => {
+                        eh.on_mouse_button_released(window_id, device_id, button)?
+                    }
+                },
+
+                WindowEvent::MouseWheel {
+                    device_id,
+                    delta,
+                    phase,
+                    ..
+                } => eh.on_scroll(window_id, device_id, delta, phase)?,
+
+                WindowEvent::Touch(touch) => eh.on_touch(
+                    window_id,
+                    touch.device_id,
+                    touch.phase,
+                    touch.location,
+                    touch.force,
+                    touch.id,
+                )?,
+
+                WindowEvent::AxisMotion {
+                    device_id,
+                    axis,
+                    value,
+                } => eh.on_axis_moved(window_id, device_id, axis, value)?,
+
+                // Not universally supported.
+                WindowEvent::TouchpadPressure { .. } => (),
+
+                // Not universally supported.
+                WindowEvent::ThemeChanged(_) => (),
             },
 
-            _ => (),
+            Event::DeviceEvent { device_id, event } => match event {
+                DeviceEvent::Added => eh.on_device_added(device_id)?,
+
+                DeviceEvent::Removed => eh.on_device_removed(device_id)?,
+
+                DeviceEvent::MouseMotion { delta } => {
+                    eh.on_device_cursor_moved(device_id, PhysicalPosition::new(delta.0, delta.1))?
+                }
+
+                DeviceEvent::MouseWheel { delta } => eh.on_device_scroll(device_id, delta)?,
+
+                DeviceEvent::Motion { axis, value } => {
+                    eh.on_device_axis_moved(device_id, axis, value)?
+                }
+
+                DeviceEvent::Button { button, state } => match state {
+                    ElementState::Pressed => eh.on_device_button_pressed(device_id, button)?,
+                    ElementState::Released => eh.on_device_button_released(device_id, button)?,
+                },
+
+                DeviceEvent::Key(input) => {
+                    let last_key_state =
+                        self.keyboard_state
+                            .key_state(None, device_id, input.scancode);
+                    let is_repeat = *last_key_state == input.state;
+                    *last_key_state = input.state;
+                    match input.state {
+                        ElementState::Pressed => eh.on_device_key_pressed(
+                            device_id,
+                            input.scancode,
+                            input.virtual_keycode,
+                            is_repeat,
+                        )?,
+                        ElementState::Released => eh.on_device_key_released(
+                            device_id,
+                            input.scancode,
+                            input.virtual_keycode,
+                        )?,
+                    }
+                }
+
+                DeviceEvent::Text { codepoint } => eh.on_device_text(device_id, codepoint)?,
+            },
         }
         Ok(())
+    }
+}
+
+struct KeyboardState {
+    state: BTreeMap<(Option<WindowId>, DeviceId), [ElementState; 128]>,
+}
+
+impl KeyboardState {
+    pub fn new() -> Self {
+        Self {
+            state: BTreeMap::new(),
+        }
+    }
+
+    pub fn key_state(
+        &mut self,
+        window_id: Option<WindowId>,
+        device_id: DeviceId,
+        scan_code: ScanCode,
+    ) -> &mut ElementState {
+        let key = (window_id, device_id);
+        if !self.state.contains_key(&key) {
+            self.state.insert(key, [ElementState::Released; 128]);
+        }
+        // Guaranteed to succeed due to the previous lines.
+        let keyboard_state = self.state.get_mut(&key).unwrap();
+        // Assuming at most a certain number of scancodes. It should be enough.
+        // Asserting just for safety.
+        let key_idx = scan_code as usize;
+        assert!(
+            key_idx < keyboard_state.len(),
+            "Invalid scan code {}",
+            key_idx
+        );
+        &mut keyboard_state[key_idx]
     }
 }
 
