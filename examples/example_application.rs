@@ -53,6 +53,7 @@ enum CustomEvent {
     LongTimePassed,
 }
 
+#[derive(Debug)]
 struct ApplicationImpl {
     _window: Window,
     event_loop_proxy: EventLoopProxy<CustomEvent>,
