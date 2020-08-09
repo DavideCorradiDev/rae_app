@@ -60,6 +60,8 @@ struct ApplicationImpl {
     processed_fixed_frames: u64,
     processed_variable_frames: u64,
     processed_cursor_moved_events: u64,
+    processed_device_cursor_moved_events: u64,
+    processed_device_axis_motion_events: u64,
     processed_new_events_events: u64,
     processed_main_events_cleared_events: u64,
     processed_redraw_events_cleared_events: u64,
@@ -84,6 +86,8 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
             processed_fixed_frames: 0,
             processed_variable_frames: 0,
             processed_cursor_moved_events: 0,
+            processed_device_cursor_moved_events: 0,
+            processed_device_axis_motion_events: 0,
             processed_new_events_events: 0,
             processed_main_events_cleared_events: 0,
             processed_redraw_events_cleared_events: 0,
@@ -384,10 +388,13 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         device_id: DeviceId,
         position_delta: PhysicalPosition<f64>,
     ) -> Result<(), Self::Error> {
-        println!(
-            "Processed 'device cursor moved' event, device {:?}, position delta {:?}",
-            device_id, position_delta
-        );
+        if self.processed_device_cursor_moved_events % 20 == 0 {
+            println!(
+                "Processed 'device cursor moved' event, device {:?}, position delta {:?}",
+                device_id, position_delta
+            );
+        }
+        self.processed_device_cursor_moved_events = self.processed_device_cursor_moved_events + 1;
         Ok(())
     }
 
@@ -409,10 +416,13 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         axis: controller::AxisId,
         value: f64,
     ) -> Result<(), Self::Error> {
-        println!(
-            "Processed 'device axis motion' event, device {:?}, axis {:?}, value {:?}",
-            device_id, axis, value
-        );
+        if self.processed_device_axis_motion_events % 20 == 0 {
+            println!(
+                "Processed 'device axis motion' event, device {:?}, axis {:?}, value {:?}",
+                device_id, axis, value
+            );
+        }
+        self.processed_device_axis_motion_events = self.processed_device_axis_motion_events + 1;
         Ok(())
     }
 
