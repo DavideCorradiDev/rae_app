@@ -47,7 +47,7 @@ jobs:
     - name: Run tests
       shell: bash
       if: matrix.platform.run_tests
-      run: cargo test --verbose $OPTIONS -- --nocapture -- --test-threads=1 $TEST_OPTIONS
+      run: cargo test --verbose $OPTIONS -- --nocapture --test-threads=1 $TEST_OPTIONS
     - name: Generate doc
       shell: bash
       if: matrix.platform.gen_doc
