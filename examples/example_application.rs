@@ -40,6 +40,7 @@ struct ApplicationImpl {
     close_requested: bool,
     processed_fixed_frames: u64,
     processed_variable_frames: u64,
+    processed_cursor_moved_events: u64,
 }
 
 impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
@@ -59,6 +60,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
             close_requested: false,
             processed_fixed_frames: 0,
             processed_variable_frames: 0,
+            processed_cursor_moved_events: 0,
         })
     }
 
@@ -151,6 +153,35 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         Ok(())
     }
 
+    fn on_hovered_file_dropped(
+        &mut self,
+        wid: WindowId,
+        path: std::path::PathBuf,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'hovered file dropped' event, window {:?}, path {:?}",
+            wid, path
+        );
+        Ok(())
+    }
+
+    fn on_hovered_file_entered(
+        &mut self,
+        wid: WindowId,
+        path: std::path::PathBuf,
+    ) -> Result<(), Self::Error> {
+        println!(
+            "Processed 'hovered file entered' event, window {:?}, path {:?}",
+            wid, path
+        );
+        Ok(())
+    }
+
+    fn on_hovered_file_left(&mut self, wid: WindowId) -> Result<(), Self::Error> {
+        println!("Processed 'hovered file left' event, window {:?}", wid);
+        Ok(())
+    }
+
     fn on_key_pressed(
         &mut self,
         wid: WindowId,
@@ -223,10 +254,13 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
         device_id: DeviceId,
         position: PhysicalPosition<f64>,
     ) -> Result<(), Self::Error> {
-        println!(
-            "Processed 'cursor moved' event, window: {:?}, device: {:?}, position: {:?}",
-            wid, device_id, position
-        );
+        if self.processed_cursor_moved_events % 20 == 0 {
+            println!(
+                "Processed 'cursor moved' event, window: {:?}, device: {:?}, position: {:?}",
+                wid, device_id, position
+            );
+        }
+        self.processed_cursor_moved_events = self.processed_cursor_moved_events + 1;
         Ok(())
     }
 

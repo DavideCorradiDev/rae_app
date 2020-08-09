@@ -114,6 +114,14 @@ where
 
                 WindowEvent::Destroyed => eh.on_destroyed(window_id)?,
 
+                WindowEvent::Focused(focused) => {
+                    if focused {
+                        eh.on_focus_gained(window_id)?;
+                    } else {
+                        eh.on_focus_lost(window_id)?;
+                    }
+                }
+
                 WindowEvent::Resized(size) => eh.on_resized(window_id, size)?,
 
                 WindowEvent::ScaleFactorChanged {
@@ -125,13 +133,11 @@ where
 
                 WindowEvent::ReceivedCharacter(c) => eh.on_received_character(window_id, c)?,
 
-                WindowEvent::Focused(focused) => {
-                    if focused {
-                        eh.on_focus_gained(window_id)?;
-                    } else {
-                        eh.on_focus_lost(window_id)?;
-                    }
-                }
+                WindowEvent::DroppedFile(path) => eh.on_hovered_file_dropped(window_id, path)?,
+
+                WindowEvent::HoveredFile(path) => eh.on_hovered_file_entered(window_id, path)?,
+
+                WindowEvent::HoveredFileCancelled => eh.on_hovered_file_left(window_id)?,
 
                 WindowEvent::KeyboardInput {
                     device_id,

@@ -57,6 +57,26 @@ where
         Ok(())
     }
 
+    fn on_hovered_file_dropped(
+        &mut self,
+        _wid: WindowId,
+        _path: std::path::PathBuf,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_hovered_file_entered(
+        &mut self,
+        _wid: WindowId,
+        _path: std::path::PathBuf,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_hovered_file_left(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
     fn on_key_pressed(
         &mut self,
         _wid: WindowId,
