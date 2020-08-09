@@ -5,5 +5,5 @@ pub use winit::{
         DeviceEvent, DeviceId, ElementState, Event, KeyboardInput, MouseScrollDelta as ScrollDelta,
         StartCause as EventLoopStartCause, WindowEvent,
     },
-    event_loop::*,
+    event_loop::{EventLoop, EventLoopClosed, EventLoopProxy, EventLoopWindowTarget},
 };
