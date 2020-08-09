@@ -100,10 +100,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
 
     fn on_fixed_update(&mut self, dt: std::time::Duration) -> Result<(), Self::Error> {
         if self.processed_fixed_frames % 30 == 0 {
-            println!(
-                "Fixed update called, frame {}, dt = {:?}",
-                self.processed_fixed_frames, dt
-            );
+            println!("Processed 'fixed update' event, dt = {:?}", dt);
         }
 
         if self.processed_fixed_frames % 30 == 0 {
@@ -122,10 +119,7 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
 
     fn on_variable_update(&mut self, dt: std::time::Duration) -> Result<(), Self::Error> {
         if self.processed_variable_frames % 30 == 0 {
-            println!(
-                "Variable update called, frame {}, dt = {:?}",
-                self.processed_variable_frames, dt
-            );
+            println!("Processed 'variable update' event, dt = {:?}", dt);
         }
         self.processed_variable_frames = self.processed_variable_frames + 1;
         Ok(())

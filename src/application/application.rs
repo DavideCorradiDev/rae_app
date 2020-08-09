@@ -72,7 +72,7 @@ where
         self.last_variable_update_time = current_time;
 
         event_loop.run(move |event, _, control_flow| {
-            self.run_frame(&mut event_handler, event)
+            self.handle_event(&mut event_handler, event)
                 .expect("The application shut down due to an error");
             if event_handler.is_close_requested() {
                 *control_flow = ControlFlow::Exit;
@@ -80,33 +80,10 @@ where
         });
     }
 
-    fn run_frame(
-        &mut self,
-        eh: &mut EventHandlerType,
-        event: Event<EventHandlerType::CustomEvent>,
-    ) -> Result<(), EventHandlerType::Error> {
-        self.handle_event(event, eh)?;
-
-        let current_time = std::time::Instant::now();
-
-        while current_time - self.last_fixed_update_time >= self.fixed_update_period {
-            eh.on_fixed_update(self.fixed_update_period)?;
-            self.last_fixed_update_time += self.fixed_update_period;
-        }
-
-        let time_since_last_variable_update = current_time - self.last_variable_update_time;
-        if time_since_last_variable_update > self.variable_update_min_period {
-            eh.on_variable_update(time_since_last_variable_update)?;
-            self.last_variable_update_time = current_time;
-        }
-
-        Ok(())
-    }
-
     fn handle_event(
         &mut self,
-        event: Event<EventHandlerType::CustomEvent>,
         eh: &mut EventHandlerType,
+        event: Event<EventHandlerType::CustomEvent>,
     ) -> Result<(), EventHandlerType::Error> {
         match event {
             Event::NewEvents(start_cause) => eh.on_new_events(start_cause)?,
@@ -117,7 +94,10 @@ where
 
             Event::Resumed => eh.on_resumed()?,
 
-            Event::MainEventsCleared => eh.on_main_events_cleared()?,
+            Event::MainEventsCleared => {
+                self.update(eh)?;
+                eh.on_main_events_cleared()?;
+            }
 
             Event::RedrawRequested(window_id) => eh.on_redraw_requested(window_id)?,
 
@@ -285,6 +265,23 @@ where
                 DeviceEvent::Text { codepoint } => eh.on_device_text(device_id, codepoint)?,
             },
         }
+        Ok(())
+    }
+
+    fn update(&mut self, eh: &mut EventHandlerType) -> Result<(), EventHandlerType::Error> {
+        let current_time = std::time::Instant::now();
+
+        while current_time - self.last_fixed_update_time >= self.fixed_update_period {
+            eh.on_fixed_update(self.fixed_update_period)?;
+            self.last_fixed_update_time += self.fixed_update_period;
+        }
+
+        let time_since_last_variable_update = current_time - self.last_variable_update_time;
+        if time_since_last_variable_update > self.variable_update_min_period {
+            eh.on_variable_update(time_since_last_variable_update)?;
+            self.last_variable_update_time = current_time;
+        }
+
         Ok(())
     }
 }
