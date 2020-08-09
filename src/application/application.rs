@@ -364,8 +364,12 @@ mod tests {
         type Error = MyError;
         type CustomEvent = ();
 
-        fn new(_: &EventLoop<()>) -> Result<Self, MyError> {
+        fn new(_: &EventLoop<()>) -> Result<Self, Self::Error> {
             Ok(Self {})
+        }
+
+        fn on_fixed_update(&mut self, _: std::time::Duration) -> Result<ControlFlow, Self::Error> {
+            Ok(ControlFlow::Exit)
         }
     }
 
