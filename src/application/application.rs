@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use crate::{
     event::{
         keyboard::ScanCode, ControlFlow, DeviceEvent, DeviceId, ElementState, Event, EventHandler,
-        EventLoop, KeyboardInput, WindowEvent,
+        EventLoop, WindowEvent,
     },
     window::{PhysicalPosition, WindowId},
 };
@@ -159,7 +159,30 @@ where
                     device_id,
                     input,
                     is_synthetic,
-                } => self.handle_key_event(eh, window_id, device_id, &input, is_synthetic)?,
+                } => {
+                    let last_key_state =
+                        self.keyboard_state
+                            .key_state(Some(window_id), device_id, input.scancode);
+                    let is_repeat = *last_key_state == input.state;
+                    *last_key_state = input.state;
+                    match input.state {
+                        ElementState::Pressed => eh.on_key_pressed(
+                            window_id,
+                            device_id,
+                            input.scancode,
+                            input.virtual_keycode,
+                            is_synthetic,
+                            is_repeat,
+                        )?,
+                        ElementState::Released => eh.on_key_released(
+                            window_id,
+                            device_id,
+                            input.scancode,
+                            input.virtual_keycode,
+                            is_synthetic,
+                        )?,
+                    }
+                }
 
                 WindowEvent::ModifiersChanged(mods) => eh.on_modifiers_changed(window_id, mods)?,
 
@@ -234,68 +257,29 @@ where
                     ElementState::Released => eh.on_device_button_released(device_id, button)?,
                 },
 
-                DeviceEvent::Key(input) => self.handle_device_key_event(eh, device_id, &input)?,
+                DeviceEvent::Key(input) => {
+                    let last_key_state =
+                        self.keyboard_state
+                            .key_state(None, device_id, input.scancode);
+                    let is_repeat = *last_key_state == input.state;
+                    *last_key_state = input.state;
+                    match input.state {
+                        ElementState::Pressed => eh.on_device_key_pressed(
+                            device_id,
+                            input.scancode,
+                            input.virtual_keycode,
+                            is_repeat,
+                        )?,
+                        ElementState::Released => eh.on_device_key_released(
+                            device_id,
+                            input.scancode,
+                            input.virtual_keycode,
+                        )?,
+                    }
+                }
 
                 DeviceEvent::Text { codepoint } => eh.on_device_text(device_id, codepoint)?,
             },
-        }
-        Ok(())
-    }
-
-    fn handle_key_event(
-        &mut self,
-        eh: &mut EventHandlerType,
-        window_id: WindowId,
-        device_id: DeviceId,
-        key_data: &KeyboardInput,
-        is_synthetic: bool,
-    ) -> Result<(), EventHandlerType::Error> {
-        let last_key_state =
-            self.keyboard_state
-                .key_state(Some(window_id), device_id, key_data.scancode);
-        let is_repeat = *last_key_state == key_data.state;
-        *last_key_state = key_data.state;
-        match key_data.state {
-            ElementState::Pressed => eh.on_key_pressed(
-                window_id,
-                device_id,
-                key_data.scancode,
-                key_data.virtual_keycode,
-                is_synthetic,
-                is_repeat,
-            )?,
-            ElementState::Released => eh.on_key_released(
-                window_id,
-                device_id,
-                key_data.scancode,
-                key_data.virtual_keycode,
-                is_synthetic,
-            )?,
-        }
-        Ok(())
-    }
-
-    fn handle_device_key_event(
-        &mut self,
-        eh: &mut EventHandlerType,
-        device_id: DeviceId,
-        key_data: &KeyboardInput,
-    ) -> Result<(), EventHandlerType::Error> {
-        let last_key_state = self
-            .keyboard_state
-            .key_state(None, device_id, key_data.scancode);
-        let is_repeat = *last_key_state == key_data.state;
-        *last_key_state = key_data.state;
-        match key_data.state {
-            ElementState::Pressed => eh.on_device_key_pressed(
-                device_id,
-                key_data.scancode,
-                key_data.virtual_keycode,
-                is_repeat,
-            )?,
-            ElementState::Released => {
-                eh.on_device_key_released(device_id, key_data.scancode, key_data.virtual_keycode)?
-            }
         }
         Ok(())
     }
