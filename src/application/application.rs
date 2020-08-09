@@ -234,7 +234,11 @@ where
                     value,
                 } => eh.on_axis_moved(window_id, device_id, axis, value)?,
 
-                _ => (),
+                // Not universally supported.
+                WindowEvent::TouchpadPressure { .. } => (),
+
+                // Not universally supported.
+                WindowEvent::ThemeChanged(_) => (),
             },
 
             Event::DeviceEvent { device_id, event } => match event {
