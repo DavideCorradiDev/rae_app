@@ -75,12 +75,15 @@ where
         self.last_variable_update_time = current_time;
 
         event_loop.run(move |event, _, control_flow| {
-            match self
-                .handle_event(&mut event_handler, event)
-                .expect("The application shut down due to an error")
-            {
-                ControlFlow::Continue => *control_flow = winit::event_loop::ControlFlow::Poll,
-                ControlFlow::Exit => *control_flow = winit::event_loop::ControlFlow::Exit,
+            match self.handle_event(&mut event_handler, event) {
+                Ok(flow) => match flow {
+                    ControlFlow::Continue => *control_flow = winit::event_loop::ControlFlow::Poll,
+                    ControlFlow::Exit => *control_flow = winit::event_loop::ControlFlow::Exit,
+                },
+                Err(e) => {
+                    event_handler.on_error(e);
+                    *control_flow = winit::event_loop::ControlFlow::Exit;
+                }
             }
         });
     }
