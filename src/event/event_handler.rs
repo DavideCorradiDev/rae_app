@@ -1,4 +1,8 @@
-use super::{controller, event::ScrollDelta, keyboard, mouse, touch, DeviceId, EventLoop};
+use super::{
+    controller,
+    event::{EventLoopStartCause, ScrollDelta},
+    keyboard, mouse, touch, DeviceId, EventLoop,
+};
 use crate::window::{PhysicalPosition, PhysicalSize, WindowId};
 
 pub trait EventHandler<ErrorType, CustomEventType>
@@ -195,6 +199,38 @@ where
         _axis: controller::AxisId,
         _value: f64,
     ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_custom_event(&mut self, _event: Self::CustomEvent) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_new_events(&mut self, _start_cause: EventLoopStartCause) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_main_events_cleared(&mut self) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_redraw_requested(&mut self, _wid: WindowId) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_redraw_events_cleared(&mut self) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_suspended(&mut self) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_resumed(&mut self) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    fn on_event_loop_destroyed(&mut self) -> Result<(), Self::Error> {
         Ok(())
     }
 

@@ -1,7 +1,10 @@
 use rae_app::*;
 
 use application::Application;
-use event::{controller, keyboard, mouse, touch, DeviceId, EventHandler, EventLoop, ScrollDelta};
+use event::{
+    controller, keyboard, mouse, touch, DeviceId, EventHandler, EventLoop, EventLoopStartCause,
+    ScrollDelta,
+};
 use window::{PhysicalPosition, PhysicalSize, Size, Window, WindowBuilder, WindowId};
 
 #[derive(Debug)]
@@ -41,6 +44,9 @@ struct ApplicationImpl {
     processed_fixed_frames: u64,
     processed_variable_frames: u64,
     processed_cursor_moved_events: u64,
+    processed_new_events_events: u64,
+    processed_main_events_cleared_events: u64,
+    processed_redraw_events_cleared_events: u64,
 }
 
 impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
@@ -61,6 +67,9 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
             processed_fixed_frames: 0,
             processed_variable_frames: 0,
             processed_cursor_moved_events: 0,
+            processed_new_events_events: 0,
+            processed_main_events_cleared_events: 0,
+            processed_redraw_events_cleared_events: 0,
         })
     }
 
@@ -360,6 +369,59 @@ impl EventHandler<ApplicationError, CustomEvent> for ApplicationImpl {
             window {:?}, device {:?}, phase {:?}, location {:?}, force {:?}, id {:?}",
             wid, device_id, phase, location, force, id
         );
+        Ok(())
+    }
+
+    fn on_custom_event(&mut self, _event: Self::CustomEvent) -> Result<(), Self::Error> {
+        println!("Processed 'custom' event");
+        Ok(())
+    }
+
+    fn on_new_events(&mut self, start_cause: EventLoopStartCause) -> Result<(), Self::Error> {
+        if self.processed_new_events_events % 100000 == 0 {
+            println!(
+                "Processed 'new events' event, start cause {:?}",
+                start_cause
+            );
+        }
+        self.processed_new_events_events = self.processed_new_events_events + 1;
+        Ok(())
+    }
+
+    fn on_main_events_cleared(&mut self) -> Result<(), Self::Error> {
+        if self.processed_main_events_cleared_events % 100000 == 0 {
+            println!("Processed 'main events cleared' event");
+        }
+        self.processed_main_events_cleared_events = self.processed_main_events_cleared_events + 1;
+        Ok(())
+    }
+
+    fn on_redraw_requested(&mut self, wid: WindowId) -> Result<(), Self::Error> {
+        println!("Processed 'redraw requested' event, window id {:?}", wid);
+        Ok(())
+    }
+
+    fn on_redraw_events_cleared(&mut self) -> Result<(), Self::Error> {
+        if self.processed_redraw_events_cleared_events % 100000 == 0 {
+            println!("Processed 'redraw events cleared' event");
+        }
+        self.processed_redraw_events_cleared_events =
+            self.processed_redraw_events_cleared_events + 1;
+        Ok(())
+    }
+
+    fn on_suspended(&mut self) -> Result<(), Self::Error> {
+        println!("Processed 'suspended' event");
+        Ok(())
+    }
+
+    fn on_resumed(&mut self) -> Result<(), Self::Error> {
+        println!("Processed 'resumed' event");
+        Ok(())
+    }
+
+    fn on_event_loop_destroyed(&mut self) -> Result<(), Self::Error> {
+        println!("Processed 'event loop destroyed' event");
         Ok(())
     }
 }

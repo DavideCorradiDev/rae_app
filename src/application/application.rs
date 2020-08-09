@@ -109,6 +109,22 @@ where
         eh: &mut EventHandlerType,
     ) -> Result<(), EventHandlerType::Error> {
         match event {
+            Event::NewEvents(start_cause) => eh.on_new_events(start_cause)?,
+
+            Event::UserEvent(event) => eh.on_custom_event(event)?,
+
+            Event::Suspended => eh.on_suspended()?,
+
+            Event::Resumed => eh.on_resumed()?,
+
+            Event::MainEventsCleared => eh.on_main_events_cleared()?,
+
+            Event::RedrawRequested(window_id) => eh.on_redraw_requested(window_id)?,
+
+            Event::RedrawEventsCleared => eh.on_redraw_events_cleared()?,
+
+            Event::LoopDestroyed => eh.on_event_loop_destroyed()?,
+
             Event::WindowEvent { window_id, event } => match event {
                 WindowEvent::CloseRequested => eh.on_close_requested(window_id)?,
 
@@ -203,8 +219,6 @@ where
 
                 _ => (),
             },
-
-            _ => (),
         }
         Ok(())
     }
