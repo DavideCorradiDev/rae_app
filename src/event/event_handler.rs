@@ -315,4 +315,8 @@ where
     fn on_variable_update(&mut self, _dt: std::time::Duration) -> Result<ControlFlow, Self::Error> {
         Ok(ControlFlow::Continue)
     }
+
+    fn on_error(&mut self, error: Self::Error) {
+        eprintln!("The application shut down due to an error ({})", error);
+    }
 }
