@@ -305,7 +305,7 @@ where
     }
 
     fn on_event_loop_destroyed(&mut self) -> Result<ControlFlow, Self::Error> {
-        Ok(ControlFlow::Continue)
+        Ok(ControlFlow::Exit)
     }
 
     fn on_fixed_update(&mut self, _dt: std::time::Duration) -> Result<ControlFlow, Self::Error> {
