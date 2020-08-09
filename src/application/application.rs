@@ -8,6 +8,7 @@ use crate::{
     window::{PhysicalPosition, WindowId},
 };
 
+#[derive(Clone)]
 pub struct Application<EventHandlerType, Error, CustomEvent>
 where
     EventHandlerType: EventHandler<Error, CustomEvent> + 'static,
@@ -299,6 +300,7 @@ where
     }
 }
 
+#[derive(Clone)]
 struct KeyboardState {
     state: BTreeMap<(Option<WindowId>, DeviceId), [ElementState; 128]>,
 }
